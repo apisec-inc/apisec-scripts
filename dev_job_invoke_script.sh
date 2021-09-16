@@ -60,7 +60,7 @@ echo "Task Status = " $taskStatus
  exit 1
 fi
 
-echo "$(curl --location --request GET "https://cloud.fxlabs.io/api/v1/runs/${runId}" --header "Authorization: Bearer "$token"")"
+echo "$(curl --location --request GET "https://developer.apisec.ai/api/v1/runs/${runId}" --header "Authorization: Bearer "$token"")"
 exit 1
 
 return 0
