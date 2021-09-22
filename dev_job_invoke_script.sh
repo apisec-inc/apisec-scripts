@@ -19,7 +19,7 @@ token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'$
 
 echo "generated token is:" $token
 
-runId=$(curl --location --request POST "https://developer.apisec.ai/api/v1/runs/job/${FX_JOBID}?region=${REGION}&env=${FX_ENVID}&projectId=${FX_PROJECTID}${FX_SCRIPT} --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+runId=$(curl --location --request POST "https://developer.apisec.ai/api/v1/runs/job/${FX_JOBID}?region=${REGION}&env=${FX_ENVID}&projectId=${FX_PROJECTID}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
 
 echo "runId =" $runId
 if [ -z "$runId" ]
