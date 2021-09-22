@@ -7,12 +7,18 @@ FX_JOBID=$3
 REGION=$4
 FX_ENVID=$5
 FX_PROJECTID=$6
+FX_TAGS=$7
+FX_SCRIPT=""
+if [ "$FX_TAGS" != "" ];
+then
+FX_SCRIPT="&tags=script:"+${FX_TAGS}
+fi
 
 token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' https://cloud.fxlabs.io/login | jq -r .token)
 
 echo "generated token is:" $token
 
-runId=$(curl --location --request POST "https://cloud.fxlabs.io/api/v1/runs/job/${FX_JOBID}?region=${REGION}&env=${FX_ENVID}&projectId=${FX_PROJECTID}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+runId=$(curl --location --request POST "https://cloud.fxlabs.io/api/v1/runs/job/${FX_JOBID}?region=${REGION}&env=${FX_ENVID}&projectId=${FX_PROJECTID}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
 
 echo "runId =" $runId
 if [ -z "$runId" ]
