@@ -1,14 +1,44 @@
 #!/bin/bash
 # Begin
+TEMP=$(getopt -n "$0" -a -l "user:,password:,jobId:,region:,envId:,projectId:" -- -- "$@")
 
-FX_USER=$1
-FX_PWD=$2
-FX_JOBID=$3
-REGION=$4
-FX_ENVID=$5
-FX_PROJECTID=$6
-FX_EMAIL_REPORT=$7
-FX_TAGS=$8
+    [ $? -eq 0 ] || exit
+
+    eval set --  "$TEMP"
+
+    while [ $# -gt 0 ]
+    do
+             case "$1" in
+                    --user) FX_USER="$2"; shift;;
+                    --password) FX_PWD="$2"; shift;;
+                    --jobId) FX_JOBID="$2"; shift;;
+                    --region) REGION="$2"; shift;;
+                    --envId) FX_ENVID="$2"; shift;;
+                    --projectId) FX_PROJECTID="$2"; shift;;
+                    --emailReport) FX_EMAIL_REPORT="$2"; shift;;
+                    --tags) FX_TAGS="$2"; shift;;
+                    --) shift;;
+             esac
+             shift;
+    done
+    echo "USER: $FX_USER";
+    echo "PWD: $FX_PWD";
+    echo "JOBID: $FX_JOBID";
+    echo "PROJECTID: $FX_PROJECTID";
+    echo "REGION: $REGION";
+    echo "ENVID: $FX_ENVID";
+    echo "FX_EMAIL_REPORT: $FX_EMAIL_REPORT";
+    echo "FX_TAGS: $FX_TAGS";
+    
+#FX_USER=$1
+#FX_PWD=$2
+#FX_JOBID=$3
+#REGION=$4
+#FX_ENVID=$5
+#FX_PROJECTID=$6
+#FX_EMAIL_REPORT=$7
+#FX_TAGS=$8
+
 FX_SCRIPT=""
 if [ "$FX_TAGS" != "" ];
 then
