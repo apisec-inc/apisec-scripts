@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 # Begin
 TEMP=$(getopt -n "$0" -a -l "username:,password:,project:,profile:,scanner:,emailReport:,reportType:,tags:" -- -- "$@")
 
