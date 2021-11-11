@@ -1,13 +1,33 @@
-!/bin/bash
+#!/bin/bash
 # Begin
+TEMP=$(getopt -n "$0" -a -l "username:,password:,project:,profile:,scanner:,emailReport:,reportType:,tags:" -- -- "$@")
 
-FX_USER=$1
-FX_PWD=$2
-FX_JOBID=$3
-REGION=$4
-FX_ENVID=$5
-FX_PROJECTID=$6
-FX_TAGS=$7
+    [ $? -eq 0 ] || exit
+
+    eval set --  "$TEMP"
+
+    while [ $# -gt 0 ]
+    do
+             case "$1" in
+                    --username) FX_USER="$2"; shift;;
+                    --password) FX_PWD="$2"; shift;;
+                    --project) FX_PROJECT_NAME="$2"; shift;;
+                    --profile) JOB_NAME="$2"; shift;;
+                    --scanner) REGION="$2"; shift;;
+                    --emailReport) FX_EMAIL_REPORT="$2"; shift;;
+                    --reportType) FX_REPORT_TYPE="$2"; shift;;
+                    --tags) FX_TAGS="$2"; shift;;
+                    --) shift;;
+             esac
+             shift;
+    done
+#FX_USER=$1
+#FX_PWD=$2
+#FX_JOBID=$3
+#REGION=$4
+#FX_ENVID=$5
+#FX_PROJECTID=$6
+#FX_TAGS=$7
 
 FX_SCRIPT=""
 if [ "$FX_TAGS" != "" ];
@@ -19,14 +39,14 @@ token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'$
 
 echo "generated token is:" $token
 
-runId=$(curl --location --request POST "https://developer.apisec.ai/api/v1/runs/job/${FX_JOBID}?region=${REGION}&env=${FX_ENVID}&projectId=${FX_PROJECTID}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+runId=$(curl --location --request POST "https://developer.apisec.ai/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
 
 echo "runId =" $runId
 if [ -z "$runId" ]
 then
           echo "RunId = " "$runId"
           echo "Invalid runid"
-          echo $(curl --location --request POST "https://developer.apisec.ai/api/v1/runs/job/${FX_JOBID}?region=${REGION}&env=${FX_ENVID}&projectId=${FX_PROJECTID}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+          echo $(curl --location --request POST "https://developer.apisec.ai/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
           exit 1
 fi
 

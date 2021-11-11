@@ -1,6 +1,6 @@
 #!/bin/bash
 # Begin
-TEMP=$(getopt -n "$0" -a -l "user:,password:,jobId:,region:,envId:,projectId:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "username:,password:,project:,profile:,scanner:,emailReport:,reportType:,tags:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -9,26 +9,18 @@ TEMP=$(getopt -n "$0" -a -l "user:,password:,jobId:,region:,envId:,projectId:" -
     while [ $# -gt 0 ]
     do
              case "$1" in
-                    --user) FX_USER="$2"; shift;;
+                    --username) FX_USER="$2"; shift;;
                     --password) FX_PWD="$2"; shift;;
-                    --jobId) FX_JOBID="$2"; shift;;
-                    --region) REGION="$2"; shift;;
-                    --envId) FX_ENVID="$2"; shift;;
-                    --projectId) FX_PROJECTID="$2"; shift;;
+                    --project) FX_PROJECT_NAME="$2"; shift;;
+                    --profile) JOB_NAME="$2"; shift;;
+                    --scanner) REGION="$2"; shift;;
                     --emailReport) FX_EMAIL_REPORT="$2"; shift;;
+                    --reportType) FX_REPORT_TYPE="$2"; shift;;
                     --tags) FX_TAGS="$2"; shift;;
                     --) shift;;
              esac
              shift;
     done
-    echo "USER: $FX_USER";
-    echo "PWD: $FX_PWD";
-    echo "JOBID: $FX_JOBID";
-    echo "PROJECTID: $FX_PROJECTID";
-    echo "REGION: $REGION";
-    echo "ENVID: $FX_ENVID";
-    echo "FX_EMAIL_REPORT: $FX_EMAIL_REPORT";
-    echo "FX_TAGS: $FX_TAGS";
     
 #FX_USER=$1
 #FX_PWD=$2
@@ -49,15 +41,14 @@ token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'$
 
 echo "generated token is:" $token
 
-runId=$(curl --location --request POST "https://cloud.fxlabs.io/api/v1/runs/job/${FX_JOBID}?region=${REGION}&env=${FX_ENVID}&projectId=${FX_PROJECTID}&emailReport=${FX_EMAIL_REPORT}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
-#runId=$(curl --location --request POST "https://cloud.fxlabs.io/api/v1/runs/job/${FX_JOBID}?region=${REGION}&env=${FX_ENVID}&projectId=${FX_PROJECTID}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+runId=$(curl --location --request POST "https://cloud.fxlabs.io/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
 
 echo "runId =" $runId
 if [ -z "$runId" ]
 then
           echo "RunId = " "$runId"
           echo "Invalid runid"
-          echo $(curl --location --request POST "https://cloud.fxlabs.io/api/v1/runs/job/${FX_JOBID}?region=${REGION}&env=${FX_ENVID}&projectId=${FX_PROJECTID}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+          echo $(curl --location --request POST "https://cloud.fxlabs.io/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
           exit 1
 fi
 
