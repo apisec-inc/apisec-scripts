@@ -45,14 +45,14 @@ URL="https://cloud.fxlabs.io/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JO
 
 url=$( echo "$URL" | sed 's/ /%20/g' )
 
-runId=$(curl --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+runId=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
 
 echo "runId =" $runId
 if [ -z "$runId" ]
 then
           echo "RunId = " "$runId"
           echo "Invalid runid"
-          echo $(curl --location --request POST "https://cloud.fxlabs.io/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+          echo $(curl -s --location --request POST "https://cloud.fxlabs.io/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
           exit 1
 fi
 
@@ -67,14 +67,14 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                 sleep 5
                  echo "Checking Status...."
 
-                passPercent=$(curl --location --request GET "https://cloud.fxlabs.io/api/v1/runs/${runId}" --header "Authorization: Bearer "$token""| jq -r '.["data"]|.ciCdStatus')
+                passPercent=$(curl -s --location --request GET "https://cloud.fxlabs.io/api/v1/runs/${runId}" --header "Authorization: Bearer "$token""| jq -r '.["data"]|.ciCdStatus')
 
                         IFS=':' read -r -a array <<< "$passPercent"
 
                         taskStatus="${array[0]}"
 
                         echo "Status =" "${array[0]}" " Success Percent =" "${array[1]}"  " Total Tests =" "${array[2]}" " Total Failed =" "${array[3]}" " Run =" "${array[6]}"
-
+                      # VAR2=$(echo "Status =" "${array[0]}" " Success Percent =" "${array[1]}"  " Total Tests =" "${array[2]}" " Total Failed =" "${array[3]}" " Run =" "${array[6]}")      
 
 
                 if [ "$taskStatus" == "COMPLETED" ];then
@@ -82,7 +82,7 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                        # echo  "Run detail link https://cloud.fxlabs.io/${array[7]}"
                         echo  "Run detail link https://cloud.fxlabs.io${array[7]}"
                         echo "-----------------------------------------------"
-                        echo "Job run successfully completed"
+                        echo "Scan Successfully Completed"
                         exit 0
 
                 fi
@@ -93,7 +93,7 @@ echo "Task Status = " $taskStatus
  exit 1
 fi
 
-echo "$(curl --location --request GET "https://cloud.fxlabs.io/api/v1/runs/${runId}" --header "Authorization: Bearer "$token"")"
+echo "$(curl -s --location --request GET "https://cloud.fxlabs.io/api/v1/runs/${runId}" --header "Authorization: Bearer "$token"")"
 exit 1
 
 return 0
