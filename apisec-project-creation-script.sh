@@ -4,7 +4,7 @@
 
 # How to run this script.
 
-# Step 1:        bash apisec-project-creation-script.sh --username "<username>" --password "<password>" --hostname "<Hostname or IP>" --projectname "devops"  --openapispecurl "<Open APi Spec URL>"  --NoProjects "<No of projects to create>"
+# Syntax:        bash apisec-project-creation-script.sh --username "<username>" --password "<password>" --hostname "<Hostname or IP>" --projectname "devops"  --openapispecurl "<Open APi Spec URL>"  --NoProjects "<No of projects to create>"
 # Example usage: bash apisec-project-creation-script.sh --username "admin@apisec.ai" --password "apisec@5421" --hostname "20.99.193.218" --projectname "devops"  --openapispecurl "http://application.apisec.ai:8080/v2/api-docs"  --NoProjects "10"
 
 
