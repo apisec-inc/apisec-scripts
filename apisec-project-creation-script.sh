@@ -48,7 +48,7 @@ do
   echo "Will wait for 2 mintues before making another post request for new project registration."
   echo " "
   
-  sleep 25
+  sleep 120
 done
 
 echo "Successfully created $NoProjectsToCreate projects in $FX_HOSTNAME environment!!!"
