@@ -45,7 +45,7 @@ do
   curl  -k -s -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "https://${FX_HOSTNAME}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECTNAME}'","openAPISpec":"'${FX_OpenAPISpecUrl}'","planType":"ENTERPRISE","personalizedCoverage":{"auths":[]}}'
   echo " "
   echo " "
-  echo "Will wait for 2 mintues before making another post request for new project registration."
+  echo "Will wait for 1 mintue before making another post request for new project registration."
   echo " "
   
   sleep 60
