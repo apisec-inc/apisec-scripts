@@ -1,6 +1,6 @@
 #!/bin/bash
 # Begin
-TEMP=$(getopt -n "$0" -a -l "username:,password:,project:,profile:,scanner:,emailReport:,reportType:,tags:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,emailReport:,reportType:,tags:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -9,6 +9,7 @@ TEMP=$(getopt -n "$0" -a -l "username:,password:,project:,profile:,scanner:,emai
     while [ $# -gt 0 ]
     do
              case "$1" in
+					--host) FX_HOST="$2"; shift;;
                     --username) FX_USER="$2"; shift;;
                     --password) FX_PWD="$2"; shift;;
                     --project) FX_PROJECT_NAME="$2"; shift;;
@@ -31,17 +32,22 @@ TEMP=$(getopt -n "$0" -a -l "username:,password:,project:,profile:,scanner:,emai
 #FX_EMAIL_REPORT=$7
 #FX_TAGS=$8
 
+if [ "$FX_HOST" = "" ];
+then
+FX_HOST="https://cloud.fxlabs.io"
+fi
+
 FX_SCRIPT=""
 if [ "$FX_TAGS" != "" ];
 then
 FX_SCRIPT="&tags=script:"+${FX_TAGS}
 fi
 
-token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' https://cloud.fxlabs.io/login | jq -r .token)
+token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
 
 echo "generated token is:" $token
 
-URL="https://cloud.fxlabs.io/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"
+URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"
 
 url=$( echo "$URL" | sed 's/ /%20/g' )
 
@@ -52,7 +58,7 @@ if [ -z "$runId" ]
 then
           echo "RunId = " "$runId"
           echo "Invalid runid"
-          echo $(curl -s --location --request POST "https://cloud.fxlabs.io/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+          echo $(curl -s --location --request POST "${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
           exit 1
 fi
 
@@ -67,7 +73,7 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                 sleep 5
                  echo "Checking Status...."
 
-                passPercent=$(curl -s --location --request GET "https://cloud.fxlabs.io/api/v1/runs/${runId}" --header "Authorization: Bearer "$token""| jq -r '.["data"]|.ciCdStatus')
+                passPercent=$(curl -s --location --request GET "${FX_HOST}/api/v1/runs/${runId}" --header "Authorization: Bearer "$token""| jq -r '.["data"]|.ciCdStatus')
 
                         IFS=':' read -r -a array <<< "$passPercent"
 
@@ -79,8 +85,8 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
 
                 if [ "$taskStatus" == "COMPLETED" ];then
             echo "------------------------------------------------"
-                       # echo  "Run detail link https://cloud.fxlabs.io/${array[7]}"
-                        echo  "Run detail link https://cloud.fxlabs.io${array[7]}"
+                       # echo  "Run detail link ${FX_HOST}/${array[7]}"
+                        echo  "Run detail link ${FX_HOST}${array[7]}"
                         echo "-----------------------------------------------"
                         echo "Scan Successfully Completed"
                         exit 0
@@ -93,7 +99,7 @@ echo "Task Status = " $taskStatus
  exit 1
 fi
 
-echo "$(curl -s --location --request GET "https://cloud.fxlabs.io/api/v1/runs/${runId}" --header "Authorization: Bearer "$token"")"
+echo "$(curl -s --location --request GET "${FX_HOST}/api/v1/runs/${runId}" --header "Authorization: Bearer "$token"")"
 exit 1
 
 return 0
