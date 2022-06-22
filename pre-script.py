@@ -8,8 +8,8 @@ from datetime import datetime
         
 def sign_request(appID,
                 secret,    
-                method,      
-                url):
+                url,      
+                method):
     verb = method.upper()
 
     utc_now = str(datetime.utcnow().strftime("%b, %d %Y %H:%M:%S ")) + "GMT"
