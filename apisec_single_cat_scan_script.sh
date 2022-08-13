@@ -37,7 +37,7 @@ scancount=0
 string1=$(date -u | awk '{print $4}')
 while [ $PAGE -le $PAGES ]
 do
-   projectIds=$(curl -s -k --location --request GET "https://${FX_HOSTNAME}/api/v1/projects/myProjects?page=${PAGE}&pageSize=3" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.[]|.| .name + " " + .id')
+   projectIds=$(curl -s -k --location --request GET "https://${FX_HOSTNAME}/api/v1/projects/myProjects?page=${PAGE}&pageSize=10" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.[]|.| .name + " " + .id')
    echo " "
    echo "Scanning will be triggered on the following projects of ${PAGE} page of the ${FX_USER} user account!!!"
    echo "-----------------------------------------------"
