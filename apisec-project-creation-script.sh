@@ -42,13 +42,13 @@ do
   RANDOM=$$
   FX_PROJECTNAME="${FX_PROJECT_NAME}${RANDOM}${count}"
   echo "ProjectName: $FX_PROJECTNAME Iteration No: $count"
-  curl  -k -s -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "https://${FX_HOSTNAME}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECTNAME}'","openAPISpec":"'${FX_OpenAPISpecUrl}'","planType":"ENTERPRISE","personalizedCoverage":{"auths":[]}}'
+  curl  -k -s -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "https://${FX_HOSTNAME}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECTNAME}'","openAPISpec":"'${FX_OpenAPISpecUrl}'","planType":"ENTERPRISE","isFileLoad": false,"personalizedCoverage":{"auths":[]}}'
   echo " "
   echo " "
-  echo "Will wait for 1 mintue before making another post request for new project registration."
+  echo "Will wait for 30 mintue before making another post request for new project registration."
   echo " "
   
-  sleep 60
+  sleep 30
 done
 
 echo "Successfully created $NoProjectsToCreate projects in $FX_HOSTNAME environment!!!"
