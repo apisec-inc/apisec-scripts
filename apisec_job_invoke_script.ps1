@@ -1,4 +1,4 @@
-param ($url ="https://cloud.fxlabs.io",
+param ($url ="https://cloud.apisec.ai",
 $username,
 $password,
 $project,
