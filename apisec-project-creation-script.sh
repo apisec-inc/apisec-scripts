@@ -36,7 +36,8 @@ echo " "
 
 
 count=0
-for i in `seq $NoProjectsToCreate`
+#for i in `seq $NoProjectsToCreate`
+for ((i=0; i<NoProjectsToCreate; i++)); do
 do
   count=`expr $count + 1`  
   RANDOM=$$
