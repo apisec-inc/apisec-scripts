@@ -9,7 +9,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
     while [ $# -gt 0 ]
     do
              case "$1" in
-					--host) FX_HOST="$2"; shift;;
+		    --host) FX_HOST="$2"; shift;;
                     --username) FX_USER="$2"; shift;;
                     --password) FX_PWD="$2"; shift;;
                     --project) FX_PROJECT_NAME="$2"; shift;;
