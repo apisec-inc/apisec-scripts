@@ -196,7 +196,7 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                                     do
                                                 
                                           if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
-                                                 echo "Failing script execution since we found "$vul" vulnerability!!!"
+                                                 echo "Failing script execution since we found "$vul" severity vulnerability!!!"
                                                  exit 1
                                            
                                           fi
