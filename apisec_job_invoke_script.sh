@@ -1,6 +1,6 @@
 #!/bin/bash
 # Begin
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,emailReport:,reportType:,tags:,fail-on-high-vulns:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,emailReport:,reportType:,tags:,fail-on-high-vulns,openApiSpecUrl,oas,playbookCreatePolicy:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -18,6 +18,9 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
                     --emailReport) FX_EMAIL_REPORT="$2"; shift;;
                     --reportType) FX_REPORT_TYPE="$2"; shift;;
                     --fail-on-high-vulns) FAIL_ON_HIGH_VULNS="$2"; shift;;
+                    --oas) OAS="$2"; shift;;
+                    --openApiSpecUrl) OPEN_API_SPEC_URL="$2"; shift;;
+                    --playbookCreatePolicy) PLAYBOOK_CREATE_POLICY="$2"; shift;;
                     --tags) FX_TAGS="$2"; shift;;
                     --) shift;;
              esac
@@ -47,9 +50,109 @@ fi
 if   [ "$FAIL_ON_HIGH_VULNS" == ""  ]; then
         FAIL_ON_HIGH_VULNS=false
 fi
+
+if   [ "$OAS" == ""  ]; then
+        OAS=false
+fi
+
+#if   [ "$PLAYBOOK_CREATE_POLICY" == ""  ] || [ "$OAS" = true ]; then
+if   [ "$PLAYBOOK_CREATE_POLICY" == ""  ]; then
+        PLAYBOOK_CREATE_POLICY=false
+fi
+
+
+
 token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
 
 #echo "generated token is:" $token
+
+if [ "$OAS" = true ]; then
+
+     getProjectName=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
+
+     if [ "$getProjectName" == null ];
+     then
+          curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECT_NAME}'","openAPISpec":"'${OPEN_API_SPEC_URL}'","planType":"ENTERPRISE","isFileLoad": false,"personalizedCoverage":{"auths":[]}}' > /dev/null
+                sleep 5
+                dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
+                projectId=$(echo "$dto" | jq -r '.id')
+
+                curl -s -X PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto" > /dev/null
+     
+                playbookTaskStatus="In_progress"
+                echo "playbookTaskStatus = " $playbookTaskStatus
+                retryCount=0
+                pCount=0
+
+                while [ "$playbookTaskStatus" == "In_progress" ]
+                        do
+                            if [ $pCount -eq 0 ]; then
+                                 echo "Checking playbooks generate task Status...."
+                            fi
+                            pCount=`expr $pCount + 1`  
+                            retryCount=`expr $retryCount + 1`  
+                            sleep 2
+
+                            playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
+                            #playbookTaskStatus="In_progress"
+                            if [ "$playbookTaskStatus" == "Done" ]; then
+                                 echo "Playbooks generation task for the registered project $FX_PROJECT_NAME is succesfully completed!!!"
+                            fi
+
+                            if [ $retryCount -ge 55  ]; then
+                                 echo " "
+                                 retryCount=`expr $retryCount \* 2`  
+                                 echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
+                                 exit 1
+                            fi
+                        done
+                PLAYBOOK_CREATE_POLICY=false
+
+     else
+          echo "$FX_PROJECT_NAME project already exists."          
+          echo " "
+     fi
+    
+fi
+
+
+if [ "$PLAYBOOK_CREATE_POLICY" = true ]; then
+
+      dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
+      projectId=$(echo "$dto" | jq -r '.id')
+
+     curl -s -X PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto" > /dev/null
+     
+    playbookTaskStatus="In_progress"
+    echo "playbookTaskStatus = " $playbookTaskStatus
+    retryCount=0
+    pCount=0
+
+    while [ "$playbookTaskStatus" == "In_progress" ]
+           do
+                if [ $pCount -eq 0 ]; then
+                     echo "Checking playbooks regenerate task Status...."
+                fi
+                pCount=`expr $pCount + 1`  
+                retryCount=`expr $retryCount + 1`  
+                sleep 2
+
+                playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
+                #playbookTaskStatus="In_progress"
+                if [ "$playbookTaskStatus" == "Done" ]; then
+                     echo "Playbooks regenerate task is succesfully completed!!!"
+                fi
+
+                if [ $retryCount -ge 55  ]; then
+                     echo " "
+                     retryCount=`expr $retryCount \* 2`  
+                     echo "Playbook Regenerate Task Status $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
+                     exit 1
+                fi                            
+           done
+  
+fi
+
 
 URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"
 
@@ -60,7 +163,8 @@ projectId=$( jq -r '.job.project.id' <<< "$data")
 #runId=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
 
 echo "runId =" $runId
-if [ -z "$runId" ]
+#if [ -z "$runId" ]
+if [ "$runId" == null ]
 then
           echo "RunId = " "$runId"
           echo "Invalid runid"
@@ -71,8 +175,6 @@ fi
 
 taskStatus="WAITING"
 echo "taskStatus = " $taskStatus
-
-
 
 while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
          do
@@ -95,6 +197,7 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                         echo  "Run detail link ${FX_HOST}${array[7]}"
                         echo "-----------------------------------------------"
                         echo "Scan Successfully Completed"
+                        echo " "
                         if [ "$FAIL_ON_HIGH_VULNS" = true ]; then
                               severity=$(curl -s -X GET "${FX_HOST}/api/v1/projects/${projectId}/vulnerabilities?&severity=All&page=0&pageSize=20" -H "accept: */*"  "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[] | .severity')
 
@@ -196,7 +299,7 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                                     do
                                                 
                                           if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
-                                                 echo "Failing script execution since we found "$vul" severity vulnerability!!!"
+                                                 echo "Failing script execution since we have found "$vul" severity vulnerability!!!"
                                                  exit 1
                                            
                                           fi
