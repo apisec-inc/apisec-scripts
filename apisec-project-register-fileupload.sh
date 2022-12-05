@@ -1,12 +1,12 @@
 #!/bin/bash
 # Begin
-# Script Purpose: This script will regsiter a project on APIsec platform using openapisec file upload method.
+# Script Purpose: This script will register a project on APIsec platform using openapisec file upload method.
 #
 #
 # How to run the this script.
-# Synxtax:       bash apisec-project-regsiter-fileupload.sh --host "<Hostname or IP>"         --username "<username>"       --password "<password>"   --project "<projectname>"    --openAPISpecFile  "<path-to-the-openApiSpec-json-file>"
+# Syntax:       bash apisec-project-register-fileupload.sh --host "<Hostname or IP>"         --username "<username>"       --password "<password>"   --project "<projectname>"    --openAPISpecFile  "<path-to-the-openApiSpec-json-file>"
 
-# Example usage: bash apisec-project-regsiter-fileupload.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"       --openAPISpecFile   "./netbanking.json"      
+# Example usage: bash apisec-project-register-fileupload.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"       --openAPISpecFile   "./netbanking.json"      
 
 
 TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,openAPISpecFile:" -- -- "$@")
