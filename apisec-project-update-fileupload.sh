@@ -1,11 +1,11 @@
 #!/bin/bash
 # Begin
 
-# Script Purpose: This script will regsiter a project on APIsec platform using openapisec file upload method.
+# Script Purpose: This script will register a project on APIsec platform using openapisec file upload method.
 #
 #
 # How to run the this script.
-# Synxtax:       bash apisec-project-update-fileupload.sh --host "<Hostname or IP>"         --username "<username>"       --password "<password>"   --project "<projectname>"    --openAPISpecFile  "<path-to-the-openApiSpec-json-file>"
+# Syntax:       bash apisec-project-update-fileupload.sh --host "<Hostname or IP>"         --username "<username>"       --password "<password>"   --project "<projectname>"    --openAPISpecFile  "<path-to-the-openApiSpec-json-file>"
 
 # Example usage: bash apisec-project-update-fileupload.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai"  --password "apisec@5421"   --project "netbanking"       --openAPISpecFile   "./netbanking.json"      
 
@@ -76,7 +76,7 @@ orgId=$(echo "$dto" | jq -r '.org.id')
                 playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                 #playbookTaskStatus="In_progress"
                 if [ "$playbookTaskStatus" == "Done" ]; then
-                     echo "OpenAPISpecFile Upload and playbooks refresh task is succesfully completed!!!"
+                     echo "OpenAPISpecFile upload and playbooks refresh task is succesfully completed!!!"
                 fi
 
                 if [ $retryCount -ge 55  ]; then
@@ -89,4 +89,4 @@ orgId=$(echo "$dto" | jq -r '.org.id')
 
 
 echo ' '
-echo 'Script execution is done.'
+echo 'Script Execution is Done.'
