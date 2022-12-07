@@ -37,15 +37,16 @@ FX_HOST="https://cloud.apisec.ai"
 fi
 
 
-#openText=$(cat "$openText" | jq . -R |  sed 's/ //g')
-openText=$(cat "$openText" | jq . -R |  tr -d ' ')
+openText=$(cat "$openText" )
+openText=${openText//\"/\\\"}
+openText=$(echo \"$openText\" | tr -d ' ')
 
 token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
 
 echo "generated token is:" $token
 echo ' '
 
-data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECT_NAME}'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "UI","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
+data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECT_NAME}'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "API","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
 
 echo ' '
 project_name=$(jq -r '.name' <<< "$data")

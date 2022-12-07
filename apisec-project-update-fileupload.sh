@@ -39,9 +39,9 @@ FX_HOST="https://cloud.apisec.ai"
 fi
 
 
-#openText=$(cat "$openText" | jq . -R |  sed 's/ //g')
-openText=$(cat "$openText" | jq . -R |  tr -d ' ')
-
+openText=$(cat "$openText" )
+openText=${openText//\"/\\\"}
+openText=$(echo \"$openText\" | tr -d ' ')
 
 token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
 
