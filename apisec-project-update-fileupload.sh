@@ -5,9 +5,11 @@
 #
 #
 # How to run the this script.
-# Syntax:       bash apisec-project-update-fileupload.sh --host "<Hostname or IP>"         --username "<username>"       --password "<password>"   --project "<projectname>"    --openAPISpecFile  "<path-to-the-openApiSpec-json-file>"
+# Syntax:        bash apisec-project-update-fileupload.sh  --host "<Hostname or IP>"         --username "<username>"       --password "<password>"    --project "<projectname>"    --openAPISpecFile   "<path-to-the-openApiSpec-json-file>"
 
-# Example usage: bash apisec-project-update-fileupload.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai"  --password "apisec@5421"   --project "netbanking"       --openAPISpecFile   "./netbanking.json"      
+# Example usage: bash apisec-project-update-fileupload.sh  --host "https://cloud.apisec.ai"  --username "admin@apisec.ai"  --password "apisec@5421"   --project "netbanking"       --openAPISpecFile   "./netbanking.json"      
+
+# Note!!! Script requires yq tool to be installed for working with yaml files.
 
 TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,openAPISpecFile:" -- -- "$@")
 
@@ -38,10 +40,21 @@ then
 FX_HOST="https://cloud.apisec.ai"
 fi
 
+fileExt=$(echo $openText)
 
-openText=$(cat "$openText" )
-openText=${openText//\"/\\\"}
-openText=$(echo \"$openText\" | tr -d ' ')
+if [[ "$fileExt" == *"yaml"* ]] ||  [[ "$fileExt" == *"yml"* ]]; then
+     echo "yaml file upload option is used."
+     openText=$(yq -r -o=json $openText)
+     openText=${openText//\"/\\\"}
+     openText=$(echo \"$openText\" | tr -d ' ')
+fi
+
+if [[ "$fileExt" == *"json"* ]]; then
+      echo "json file upload option is used."
+      openText=$(cat "$openText" )
+      openText=${openText//\"/\\\"}
+      openText=$(echo \"$openText\" | tr -d ' ')
+fi 
 
 token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
 
