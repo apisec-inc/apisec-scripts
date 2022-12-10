@@ -8,7 +8,7 @@
 
 # Example usage: bash apisec-project-register-fileupload.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"       --openAPISpecFile   "./netbanking.json"      
 
-# Note!!! Script requires yq tool to be installed for working with yaml files.
+# Note!!! Script requires yq tool to be installed for working with yaml files and jq tool for working with json files.
 
 
 TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,openAPISpecFile:" -- -- "$@")
@@ -43,15 +43,13 @@ fileExt=$(echo $openText)
 if [[ "$fileExt" == *"yaml"* ]] ||  [[ "$fileExt" == *"yml"* ]]; then
      echo "yaml file upload option is used."
      openText=$(yq -r -o=json $openText)
-     openText=${openText//\"/\\\"}
-     openText=$(echo \"$openText\" | tr -d ' ')
+     openText=$(echo $openText |  jq . -R |  tr -d ' ')
 fi
 
 if [[ "$fileExt" == *"json"* ]]; then
       echo "json file upload option is used."
       openText=$(cat "$openText" )
-      openText=${openText//\"/\\\"}
-      openText=$(echo \"$openText\" | tr -d ' ')
+      openText=$(echo $openText |  jq . -R |  tr -d ' ')
 fi 
 
 token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
