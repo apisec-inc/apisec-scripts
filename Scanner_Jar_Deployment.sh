@@ -22,7 +22,7 @@ TEMP=$(getopt -n "$0" -a -l "fx-host:,fx-iam:,fx-key:" -- -- "$@")
              shift;
     done
 
-curl -s -O https://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@raw.githubusercontent.com/apisec-inc/Release/main/Scanner/bot.jar
+curl -s -O https://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@raw.githubusercontent.com/apisec-inc/Release/main/Scanner/bot.jar
 
 export FX_HOST="$FX_HOST"
 export FX_IAM="$FX_IAM"
