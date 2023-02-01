@@ -39,7 +39,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
 
 if [ "$FX_HOST" = "" ];
 then
-FX_HOST="https://developer.apisec.ai"
+FX_HOST="https://cloud.apisec.ai"
 fi
 
 FX_SCRIPT=""
