@@ -67,7 +67,7 @@ fi
 
 token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
 
-#echo "generated token is:" $token
+echo "generated token is:" $token
 
 if [ "$OAS" = true ]; then
 
