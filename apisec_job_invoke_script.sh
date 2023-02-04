@@ -163,7 +163,8 @@ if [ "$SCAN_ALL_PROJECTS" = true ]; then
      tprojCount=1
      for proj in ${projList}
        do
-                  URL="${FX_HOST}/api/v1/runs/project/${proj}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"
+                  #URL="${FX_HOST}/api/v1/runs/project/${proj}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"
+		  URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=Unsecured%20&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"
                   url=$( echo "$URL" | sed 's/ /%20/g' )
 		  echo "The request is $url"
                   data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]')
