@@ -6,7 +6,7 @@
 # How to run the this script.
 # Syntax:        bash apisec-project-creation-script.sh  --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>"    --openApiSpecUrl  "<URL-of-the-openApiSpec>"
 
-# Example usage: bash apisec-project-creation-script.sh  --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"       --openAPISpecFile   "http://netbanking.apisec.ai:8080/v2/api-docs"
+# Example usage: bash apisec-project-creation-script.sh  --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"       --openApiSpecUrl   "http://netbanking.apisec.ai:8080/v2/api-docs"
 
 
 
