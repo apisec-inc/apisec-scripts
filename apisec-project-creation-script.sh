@@ -1,12 +1,12 @@
 #!/bin/bash
 # Begin
-# Script Purpose: This script will register a project on APIsec platform using openapisec file upload method.
+# Script Purpose: This script will register a project on APIsec platform using URL of the openapisec.
 # 
 #
 # How to run the this script.
-# Syntax:        bash apisec-project-creation-script.sh  --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>"    --openAPISpecFile  "<path-to-the-openApiSpec-json-file>"
+# Syntax:        bash apisec-project-creation-script.sh  --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>"    --openApiSpecUrl  "<URL-of-the-openApiSpec>"
 
-# Example usage: bash apisec-project-creation-script.sh  --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"       --openAPISpecFile   "./netbanking.json"      
+# Example usage: bash apisec-project-creation-script.sh  --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"       --openAPISpecFile   "http://netbanking.apisec.ai:8080/v2/api-docs"
 
 
 
@@ -20,7 +20,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,openApiSpecUrl:"
     while [ $# -gt 0 ]
     do
              case "$1" in
-		                --host) FX_HOST="$2"; shift;;
+		    --host) FX_HOST="$2"; shift;;
                     --username) FX_USER="$2"; shift;;
                     --password) FX_PWD="$2"; shift;;
                     --project) FX_PROJECT_NAME="$2"; shift;;
