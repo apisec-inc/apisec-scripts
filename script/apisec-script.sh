@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin
 
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,profileScanner:,emailReport:,reportType:,tags:,fail-on-vuln-severity:,openApiSpecUrl:,openAPISpecFile:,oas:,refresh-playbooks:,outputfile:,tier:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,profileScanner:,emailReport:,reportType:,tags:,fail-on-vuln-severity:,openApiSpecUrl:,openAPISpecFile:,internal_OpenApiSpecUrl:,refresh-playbooks:,outputfile:,tier:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -28,6 +28,9 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
 
                     # For Project Registeration via OpenSpecUrl
                     --openApiSpecUrl) OPEN_API_SPEC_URL="$2"; shift;;
+
+                    # For Project Registeration via OpenSpecUrl
+                    --internal_OpenApiSpecUrl) INTERNAL_OPEN_API_SPEC_URL="$2"; shift;;
 
                     # For Project Registeration via OpenSpecFile
                     --openAPISpecFile) openText="$2"; shift;;
@@ -87,19 +90,29 @@ else
 
 fi
 
+if [ "$INTERNAL_OPEN_API_SPEC_URL" == "" ]; then
+      INTERNAL_SPEC_FLAG=false
+else
+     wget $INTERNAL_OPEN_API_SPEC_URL -O open-api-spec.json
+     openText1=open-api-spec.json
+     INTERNAL_SPEC_FLAG=true
+fi
+
 # For Project Registeration/Update via OpenSpecFile
 if   [ "$openText" == ""  ]; then
         OASFile=false
 else
         OASFile=true
+        
 
 fi
 
+
 # For Project Profile To be Updated with a scanner
-if   [ "$PROFILE_SCANNER" != ""  ] &&  [ "$JOB_NAME" != ""  ]; then
+if   [ "$PROFILE_SCANNER" != ""  ];  then
         PROFILE_SCANNER_FLAG=true
         SCANNER_NAME=$(echo $PROFILE_SCANNER)
-        PROFILE_NAME=$(echo $JOB_NAME)
+        PROFILE_NAME=Master
 else 
         PROFILE_SCANNER_FLAG=false
 fi
@@ -237,6 +250,89 @@ if [ "$OASFile" = true ]; then
              echo "json file upload option is used."
              openText=$(cat "$openText" )
              openText=$(echo $openText |  jq . -R |  tr -d ' ')
+      fi
+
+      getProjectNameFile=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
+      if [ "$getProjectNameFile" == null ]; then
+             echo "Registering Project ${FX_PROJECT_NAME} via fileupload method!!"
+             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECT_NAME}'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "API","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
+
+             echo ' '
+             project_name=$(jq -r '.name' <<< "$data")
+             project_id=$(jq -r '.id' <<< "$data")
+
+             if [ -z "$project_id" ] || [  "$project_id" == null ]; then
+                   echo "Project Id is $project_id/empty" > /dev/null
+                   exit 1
+             else
+      
+                    echo "Successfully created the project."
+                    echo "ProjectName: $project_name"
+                    echo "ProjectId: $project_id"
+                    echo 'Script Execution is Done.'
+                    exit 0
+             fi
+      else
+             echo "Updating Project ${FX_PROJECT_NAME} via fileupload method!!"
+             dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
+             projectId=$(echo "$dto" | jq -r '.id')
+             orgId=$(echo "$dto" | jq -r '.org.id')
+             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'${FX_PROJECT_NAME}'","openAPISpec":"None","openText": '${openText}',"isFileLoad":true}' | jq -r '.data')
+             echo ' '
+             project_name=$(jq -r '.name' <<< "$data")
+             project_id=$(jq -r '.id' <<< "$data")
+
+
+             playbookTaskStatus="In_progress"
+             echo "playbookTaskStatus = " $playbookTaskStatus
+             retryCount=0
+             pCount=0
+
+             while [ "$playbookTaskStatus" == "In_progress" ]
+                    do
+                        if [ $pCount -eq 0 ]; then
+                             echo "Checking playbooks regenerate task Status...."
+                        fi
+                        pCount=`expr $pCount + 1`  
+                        retryCount=`expr $retryCount + 1`  
+                        sleep 2
+                        playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
+                
+                        if [ "$playbookTaskStatus" == "Done" ]; then
+                              echo "OpenAPISpecFile upload and playbooks refresh task is succesfully completed!!!"
+                              echo "ProjectName: $project_name"
+                              echo "ProjectId: $project_id"
+                              echo " "
+                              #echo 'Script Execution is Done.'
+                              #exit 0
+                        fi
+
+                        if [ $retryCount -ge 55  ]; then
+                             echo " "
+                             retryCount=`expr $retryCount \* 2`  
+                             echo "Playbook Regenerate Task Status is $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
+                             exit 1
+                        fi                            
+                    done       
+
+      fi
+
+fi
+
+# For Project Registeration/Update via OpenSpecFile
+if [ "$INTERNAL_SPEC_FLAG" = true ]; then
+      fileExt=$(echo $openText1)
+      if [[ "$fileExt" == *"yaml"* ]] ||  [[ "$fileExt" == *"yml"* ]]; then
+             echo "yaml file upload option is used."
+             openText=$(yq -r -o=json $openText1)
+             openText=$(echo $openText |  jq . -R |  tr -d ' ')
+      fi
+
+      if [[ "$fileExt" == *"json"* ]]; then
+             echo "json file upload option is used."
+             openText=$(cat "$openText1" )
+             openText=$(echo $openText |  jq . -R |  tr -d ' ')
+             rm -rf open-api-spec.json
       fi
 
       getProjectNameFile=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
