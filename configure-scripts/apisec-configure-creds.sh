@@ -12,12 +12,12 @@
 # Use-Case 1: To Update credentials of Basic AuthType
 # Syntax:        bash apisec-configure-creds.sh --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>" --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password <app password> 
 #
-# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "UAT"                        --authName "Default"     --app_username "user1@netbanking.io"   --app_password "admin@1234"
+# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "Master"                        --authName "Default"     --app_username "user1@netbanking.io"   --app_password "admin@1234"
 
 # Use-Case 2: To Update credentials of Token AuthType
 # Syntax:        bash apisec-configure-creds.sh --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>" --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password  <app password>  --app_endPointUrl <app's complete token endpoint url>         --app_token_param <token param to filter generated token>
 #
-# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "UAT"                        --authName "ROLE_PM"    --app_username "user1@netbanking.io"    --app_password  "admin@1234"    --app_endPointUrl "https://netbanking.apisec.ai:8080/login"   --app_token_param ".info.token"
+# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "Master"                     --authName "ROLE_PM"     --app_username "user1@netbanking.io"   --app_password  "admin@1234"    --app_endPointUrl "https://netbanking.apisec.ai:8080/login"   --app_token_param ".info.token"
 
 
 
