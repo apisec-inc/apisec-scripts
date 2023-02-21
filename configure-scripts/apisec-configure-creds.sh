@@ -10,14 +10,14 @@
 # How to run the this script.
 #
 # Use-Case 1: To Update credentials of Basic AuthType
-# Syntax:        bash apisec-configure-creds.sh --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>" --envName <existing-environmentName>   --app_username <app userName>          --app_password <app password> 
+# Syntax:        bash apisec-configure-creds.sh --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>" --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password <app password> 
 #
-# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "UAT"                        --app_username "user1@netbanking.io"   --app_password "admin@1234"
+# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "UAT"                        --authName "Default"     --app_username "user1@netbanking.io"   --app_password "admin@1234"
 
 # Use-Case 2: To Update credentials of Token AuthType
-# Syntax:        bash apisec-configure-creds.sh --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>" --envName <existing-environmentName>   --app_username <app userName>          --app_password <app password> --app_endPointUrl <app's complete token endpoint url>        --app_token_param <token param to filter generated token>
+# Syntax:        bash apisec-configure-creds.sh --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>" --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password  <app password>  --app_endPointUrl <app's complete token endpoint url>         --app_token_param <token param to filter generated token>
 #
-# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "UAT"                        --app_username "user1@netbanking.io"   --app_password "admin@1234"   --app_endPointUrl "https://netbanking.apisec.ai:8080/login"  --app_token_param ".info.token"
+# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "UAT"                        --authName "ROLE_PM"    --app_username "user1@netbanking.io"    --app_password  "admin@1234"    --app_endPointUrl "https://netbanking.apisec.ai:8080/login"   --app_token_param ".info.token"
 
 
 
@@ -87,7 +87,33 @@ data=$(curl -s --location --request GET "${FX_HOST}/api/v1/envs/projects/${PROJE
                                 authName=$(echo $(_pq '.') | jq -r '.name')
 
                                 case "$authType" in "Basic")   if [ "$authName" == "$AUTH_NAME" ]; then   
-                                                                     echo "Updating '$AUTH_NAME' Auth with Basic as AuthType of '$ENV_NAME' environment with Basic as AuthType in '$FX_PROJECT_NAME' project!!"
+                                                                     echo "Updating '$AUTH_NAME' Auth with Basic as AuthType of '$ENV_NAME' environment in '$FX_PROJECT_NAME' project!!"
+                                                                     echo " "
+                                                                     bAuth=$(echo $updatedAuths1 | jq 'map(select(.name == "'${AUTH_NAME}'") |= (.username = "'${APP_USER}'" | .password = "'${APP_PWD}'"))' | jq -c .) 
+                                                                     udto=$(echo $(_jq '.') | jq '.auths = '"${bAuth}"'')
+                                                                     updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/projects/$PROJECT_ID/env/$eId" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data') 
+                                                                     updatedAuths=$(echo "$updatedData" | jq -r '.auths[]') 
+                                                                          for row2 in $(echo "${updatedAuths}" | jq -r '. | @base64'); 
+                                                                             do
+                                                                                    _aq() {
+                                                                                             echo ${row2} | base64 --decode | jq -r ${1}
+                                                                                          }
+                                                                                          upAuthName=$(echo $(_aq '.') | jq -r '.name')
+                                                                                          if [ "$upAuthName" == "$AUTH_NAME" ]; then                                                                                                
+                                                                                                updatedAuthObj=$(echo $(_aq '.') | jq -r .)
+                                                                                          fi
+                                                                             done              
+                                                                     echo " " 
+                                                                     echo "ProjectName: $FX_PROJECT_NAME" 
+                                                                     echo "ProjectId: $PROJECT_ID" 
+                                                                     echo "EnvironmentName: $ENV_NAME" 
+                                                                     echo "EnvironmentId: $eId" 
+                                                                     echo "UpdatedAuth: $updatedAuthObj"
+                                                                     echo " " 
+                                                               fi ;;
+                                                     
+                                                     "Digest")   if [ "$authName" == "$AUTH_NAME" ]; then   
+                                                                     echo "Updating '$AUTH_NAME' Auth with Digest as AuthType of '$ENV_NAME' environment  in '$FX_PROJECT_NAME' project!!"
                                                                      echo " "
                                                                      bAuth=$(echo $updatedAuths1 | jq 'map(select(.name == "'${AUTH_NAME}'") |= (.username = "'${APP_USER}'" | .password = "'${APP_PWD}'"))' | jq -c .) 
                                                                      udto=$(echo $(_jq '.') | jq '.auths = '"${bAuth}"'')
@@ -112,12 +138,16 @@ data=$(curl -s --location --request GET "${FX_HOST}/api/v1/envs/projects/${PROJE
                                                                      echo " " 
                                                                fi ;;
 
-
                                                     "Token")   if [ "$authName" == "$AUTH_NAME" ]; then 
                                                                      echo "Updating '$AUTH_NAME' Auth with Token as AuthType of '$ENV_NAME' environment in '$FX_PROJECT_NAME' project!!"
                                                                      echo " "  
-                                                                     auth='Authorization: Bearer {{@CmdCache | curl -s -d '\'{"username":"${APP_USER}","password":"${APP_PWD}"}\'' -H '"Content-Type: application/json"' -H '"Accept: application/json"' -X POST '${ENDPOINT_URL}' | jq --raw-output '"'${TOKEN_PARAM}'"' }}'                                                                
-                                                                     bAuth=$(echo $updatedAuths1 | jq 'map(select(.name == "'${AUTH_NAME}'") |= (.header_1 = "'"${auth}"'" ))' | jq -c . )
+                                                                     auth='Authorization: Bearer {{@CmdCache | curl -s -d '\'{\""username"\":\""${APP_USER}"\",\""password"\":\""${APP_PWD}"\"}\'' -H '\""Content-Type: application/json"\"' -H '\""Accept: application/json"\"' -X POST '${ENDPOINT_URL}' | jq --raw-output '"\"${TOKEN_PARAM}"\"' }}'
+                                                                     echo $auth
+                                                                     echo " "
+                                                                     #bAuth=$(echo $updatedAuths1 | jq 'map(select(.name == "'${AUTH_NAME}'") |= (.header_1 = "'"${auth}"'" ))' | jq -c . )
+                                                                     bAuth=$(echo $updatedAuths1 | jq 'map(select(.name == "'${AUTH_NAME}'") |= (.header_1 = "Authorization: Bearer {{@CmdCache | curl -s -d '{"username":"syedimran@apisec.ai","password":"Dev@ops5665"}' -H "Content-Type: application/json" -H "Accept: application/json" -X POST https://apitest.apisec.ai/login | jq --raw-output ".token" }}" ))' | jq -c . )
+                                                                     exit 1
+                                                                     #bAuth=$(echo $updatedAuths1 | jq 'map(select(.name == "'${AUTH_NAME}'") |= (.header_1 = '"${auth}"' ))' | jq -c . )
                                                                      udto=$(echo $(_jq '.') | jq '.auths = '"${bAuth}"'')
                                                                      updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/projects/$PROJECT_ID/env/$eId" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data') 
                                                                      updatedAuths=$(echo "$updatedData" | jq -r '.auths[]')
