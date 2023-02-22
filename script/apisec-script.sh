@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin
 
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,profileScanner:,emailReport:,reportType:,tags:,fail-on-vuln-severity:,openApiSpecUrl:,openAPISpecFile:,internal_OpenApiSpecUrl:,refresh-playbooks:,outputfile:,tier:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,profileScanner:,emailReport:,reportType:,tags:,fail-on-vuln-severity:,openApiSpecUrl:,openAPISpecFile:,internal_OpenApiSpecUrl:,specType:,refresh-playbooks:,outputfile:,tier:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -31,6 +31,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
 
                     # For Project Registeration via OpenSpecUrl
                     --internal_OpenApiSpecUrl) INTERNAL_OPEN_API_SPEC_URL="$2"; shift;;
+                    --specType) SPEC_TYPE="$2"; shift;;
 
                     # For Project Registeration via OpenSpecFile
                     --openAPISpecFile) openText="$2"; shift;;
@@ -92,9 +93,7 @@ fi
 
 if [ "$INTERNAL_OPEN_API_SPEC_URL" == "" ]; then
       INTERNAL_SPEC_FLAG=false
-else
-     wget $INTERNAL_OPEN_API_SPEC_URL -O open-api-spec.json
-     openText1=open-api-spec.json
+else     
      INTERNAL_SPEC_FLAG=true
 fi
 
@@ -320,21 +319,24 @@ if [ "$OASFile" = true ]; then
 fi
 
 # For Project Registeration/Update via OpenSpecFile
-if [ "$INTERNAL_SPEC_FLAG" = true ]; then
-      fileExt=$(echo $openText1)
+if [ "$INTERNAL_SPEC_FLAG" = true ]; then      
+      fileExt=$(echo $SPEC_TYPE)
       if [[ "$fileExt" == *"yaml"* ]] ||  [[ "$fileExt" == *"yml"* ]]; then
              echo "yaml file upload option is used."
+             wget $INTERNAL_OPEN_API_SPEC_URL -O open-api-spec.yaml             
              openText=$(yq -r -o=json $openText1)
              openText=$(echo $openText |  jq . -R |  tr -d ' ')
+             rm -rf open-api-spec.yaml
       fi
 
       if [[ "$fileExt" == *"json"* ]]; then
              echo "json file upload option is used."
+             wget $INTERNAL_OPEN_API_SPEC_URL -O open-api-spec.json
+             openText1=open-api-spec.json             
              openText=$(cat "$openText1" )
              openText=$(echo $openText |  jq . -R |  tr -d ' ')
              rm -rf open-api-spec.json
-      fi
-
+      fi      
       getProjectNameFile=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
       if [ "$getProjectNameFile" == null ]; then
              echo "Registering Project ${FX_PROJECT_NAME} via fileupload method!!"
