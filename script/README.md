@@ -25,11 +25,12 @@
        Script flow of execution: Script will regsiter a project if no project with that name exists and will finish there, no scanning will be trigger as auto-pilot jobs will trigger scans automatically.
                                  If a project exists with that name then it will update the project and trigger a scan.
                                  Here script will  save OpenAPISpecs in a file and later use file upload method to register/update a project.
-       Note!!! Script requires jq tool for working with json files.                              
+       
+       Note!!! Script requires yq tool to be installed for working with yaml files and jq tool for working with json files.                              
                               
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --internal_OpenApiSpecUrl <OpenAPISpecURL>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                      --internal_OpenApiSpecUrl "http://netbanking.apisec.ai:8080/v2/api-docs"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --internal_OpenApiSpecUrl <OpenAPISpecURL>                               --specType <json if specUrl have json-content OR yaml if specUrl have  yaml-content>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                      --internal_OpenApiSpecUrl "http://netbanking.apisec.ai:8080/v2/api-docs" --specType "json"
        
 
 ##       Use-Case 4: To Configure a Project's Basic AuthType Credentials.
