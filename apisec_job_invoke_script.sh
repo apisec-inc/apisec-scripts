@@ -1,6 +1,6 @@
 #!/bin/bash
 # Begin
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,emailReport:,reportType:,outputfile:, tags:,fail-on-high-vulns,openApiSpecUrl,oas,playbookCreatePolicy:,scanAllProjects:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,emailReport:,reportType:,outputfile:, tags:,fail-on-high-vulns,openApiSpecUrl,oas,playbookCreatePolicy:,scanAllProjects:,category:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -21,7 +21,8 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
                     --oas) OAS="$2"; shift;;
                     --openApiSpecUrl) OPEN_API_SPEC_URL="$2"; shift;;
                     --playbookCreatePolicy) PLAYBOOK_CREATE_POLICY="$2"; shift;;             
-                    --scanAllProjects) SCAN_ALL_PROJECTS="$2"; shift;;                    
+                    --scanAllProjects) SCAN_ALL_PROJECTS="$2"; shift;;
+                    --category) CAT="$2"; shift;;
                     --tags) FX_TAGS="$2"; shift;;
                     --) shift;;
              esac
@@ -335,7 +336,7 @@ if [ "$SCAN_ALL_PROJECTS" = true ]; then
        echo "Total no. of projects scanned: $tprojCount"
        exit 0
 else
-     URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"     
+     URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=${CAT}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"
      url=$( echo "$URL" | sed 's/ /%20/g' )
      echo "The request is $url"
      data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]')
