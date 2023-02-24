@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin
 
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,profileScanner:,emailReport:,reportType:,tags:,fail-on-vuln-severity:,openApiSpecUrl:,openAPISpecFile:,internal_OpenApiSpecUrl:,specType:,refresh-playbooks:,outputfile:,tier:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,tier:,tags:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -10,47 +10,48 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
     while [ $# -gt 0 ]
     do
              case "$1" in
-        		    --host) FX_HOST="$2"; shift;;
+                    --host) FX_HOST="$2"; shift;;
                     --username) FX_USER="$2"; shift;;
                     --password) FX_PWD="$2"; shift;;
                     --project) FX_PROJECT_NAME="$2"; shift;;
                     --profile) JOB_NAME="$2"; shift;;                    
                     --scanner) REGION="$2"; shift;;
+                    --outputfile) OUTPUT_FILENAME="$2"; shift;;
+		    
                     --emailReport) FX_EMAIL_REPORT="$2"; shift;;
                     --reportType) FX_REPORT_TYPE="$2"; shift;;
 
                     # To Fail script execution on Vulnerable severity
                     --fail-on-vuln-severity) FAIL_ON_VULN_SEVERITY="$2"; shift;;
-                    --oas) OAS="$2"; shift;;
+
 
                     # For Refreshing Project Playbooks
                     --refresh-playbooks) REFRESH_PLAYBOOKS="$2"; shift;;
 
                     # For Project Registeration via OpenSpecUrl
-                    --openApiSpecUrl) OPEN_API_SPEC_URL="$2"; shift;;
-
-                    # For Project Registeration via OpenSpecUrl
-                    --internal_OpenApiSpecUrl) INTERNAL_OPEN_API_SPEC_URL="$2"; shift;;
-                    --specType) SPEC_TYPE="$2"; shift;;
+                    --openAPISpecUrl) OPEN_API_SPEC_URL="$2"; shift;;
 
                     # For Project Registeration via OpenSpecFile
                     --openAPISpecFile) openText="$2"; shift;;
 
+                    # For Project Registeration via OpenSpecUrl
+                    --internal_OpenAPISpecUrl) INTERNAL_OPEN_API_SPEC_URL="$2"; shift;;
+                    --specType) SPEC_TYPE="$2"; shift;;
+
                     # For Project Profile To be Updated with a scanner
                     --profileScanner) PROFILE_SCANNER="$2"; shift;;
-
-                    --outputfile) OUTPUT_FILENAME="$2"; shift;;		    
-                    --tags) FX_TAGS="$2"; shift;;
-
-                    --tier) TIER="$2"; shift;;
-
+		    
                     # For Project Credentials Update
                     --envName) ENV_NAME="$2"; shift;;                        
                     --authName) AUTH_NAME="$2"; shift;;       
                     --app_username) APP_USER="$2"; shift;;
                     --app_password) APP_PWD="$2"; shift;; 
                     --app_endPointUrl) ENDPOINT_URL="$2"; shift;;
-                    --app_token_param) TOKEN_PARAM="$2"; shift;;                                    
+                    --app_token_param) TOKEN_PARAM="$2"; shift;;  
+		    
+		    
+                    --tier) TIER="$2"; shift;;		    
+                    --tags) FX_TAGS="$2"; shift;;		    
                     --) shift;;
              esac
              shift;
@@ -318,7 +319,7 @@ if [ "$OASFile" = true ]; then
 
 fi
 
-# For Project Registeration/Update via OpenSpecFile
+# For Project Registeration/Update via a combination of OpenSpecUrl and OpenSpecFile
 if [ "$INTERNAL_SPEC_FLAG" = true ]; then      
       fileExt=$(echo $SPEC_TYPE)
       if [[ "$fileExt" == *"yaml"* ]] ||  [[ "$fileExt" == *"yml"* ]]; then
@@ -683,17 +684,17 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
 
 
                 if [ "$taskStatus" == "COMPLETED" ];then
-            echo "------------------------------------------------"
-                       # echo  "Run detail link ${FX_HOST}/${array[7]}"
+                        echo "------------------------------------------------"
+                        #echo  "Run detail link ${FX_HOST}/${array[7]}"
                         echo  "Run detail link ${FX_HOST}${array[7]}"
                         echo "-----------------------------------------------"
                         echo "Scan Successfully Completed"
                         echo " "
-			if [ "$OUTPUT_FILENAME" != "" ];then
+			            if [ "$OUTPUT_FILENAME" != "" ];then
                               sarifoutput=$(curl -s --location --request GET "${FX_HOST}/api/v1/projects/${projectId}/sarif" --header "Authorization: Bearer "$token"" | jq  '.data')
-		              #echo $sarifoutput >> $OUTPUT_FILENAME
+		                      #echo $sarifoutput >> $OUTPUT_FILENAME
                               echo $sarifoutput >> $GITHUB_WORKSPACE/$OUTPUT_FILENAME
-               		      echo "SARIF output file created successfully"
+               		          echo "SARIF output file created successfully"
                               echo " "
                         fi
                         if [ "$FAIL_ON_VULN_SEVERITY_FLAG" = true ]; then
@@ -790,44 +791,39 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                                           
                                     done
                                 echo "Found $triVulCount Trivial Severity Vulnerabilities!!!"
-                                echo " "
-
-
-                            
-                            
-                     case "$FAIL_ON_VULN_SEVERITY" in
-                         "Critical") for vul in ${severity}
-                                         do
+                                echo " "                                                        
+                                case "$FAIL_ON_VULN_SEVERITY" in 
+                                      "Critical") for vul in ${severity}
+                                                      do
                                                 
-                                             if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
-                                                 echo "Failing script execution since we have found $cVulCount Critical severity vulnerabilities!!!"
-                                                 exit 1
+                                                             if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
+                                                                    echo "Failing script execution since we have found $cVulCount Critical severity vulnerabilities!!!"
+                                                                    exit 1                                           
+                                                             fi                                             
+                                                      done
+                                      ;;
+                                      "High") for vul in ${severity}
+                                                      do
+                                                     
+                                                             if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
+                                                                    echo "Failing script execution since we have found $cVulCount Critical and $hVulCount High severity vulnerabilities!!!"
+                                                                    exit 1
                                            
-                                             fi                                             
-                                        done
-                         ;;
-                        "High") for vul in ${severity}
-                                         do
+                                                             fi                                             
+                                                      done
+                                      ;;                     
+                                      "Medium") for vul in ${severity}
+                                                      do
                                                 
-                                             if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
-                                                 echo "Failing script execution since we have found $cVulCount Critical and $hVulCount High severity vulnerabilities!!!"
-                                                 exit 1
+                                                             if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] || [ "$vul" == "Medium"  ] ; then
+                                                                    echo "Failing script execution since we have found $cVulCount Critical, $hVulCount High and $medVulCount Medium severity vulnerabilities!!!"
+                                                                    exit 1
                                            
-                                             fi                                             
-                                        done
-                         ;;
-                        "Medium") for vul in ${severity}
-                                         do
-                                                
-                                             if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] || [ "$vul" == "Medium"  ] ; then
-                                                 echo "Failing script execution since we have found $cVulCount Critical, $hVulCount High and $medVulCount Medium severity vulnerabilities!!!"
-                                                 exit 1
-                                           
-                                             fi                                             
-                                        done
-                        ;;
-                      *)                          
-                     esac
+                                                             fi                                             
+                                                      done
+                                      ;;
+                                   *)                          
+                                esac
 
                         fi 
                         exit 0
