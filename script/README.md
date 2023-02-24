@@ -73,7 +73,7 @@
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --fail-on-vuln-severity <Critical/High/Medium>
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --fail-on-vuln-severity "Critical"
 
-##       Use-Case 9: To Get Triggered Scann Email Report .
+##       Use-Case 9: To Get Triggered Scan Email Report .
        Script flow of execution: Script  trigger a scan and later send email report for the triggered scan.
                                  
        
