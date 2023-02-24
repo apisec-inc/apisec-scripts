@@ -78,7 +78,7 @@
                                  
        
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --emailReport <true/false> --reportType <RUN_SUMMARY/RUN_DETAIL/PROJECT_SUMMARY/ PROJECT_DETAIL/PROJECT_PEN_TEST_REPORT/DEVELOPER_REPORT/COMPLIANCE>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --emailReport "true" --reportType "RUN_SUMMARY"
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --emailReport "true"       --reportType "RUN_SUMMARY"
        
        Note!!: If no reportType is passed with this use-case then default reportType "RUN_SUMMARY" will be send in the email report.
        
