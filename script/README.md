@@ -87,7 +87,7 @@
                
                --emailReport "true" --reportType "RUN_SUMMARY"
 
-##       Use-Case 10: To Get Triggered Scan on any specific category and get Email Report .
+##       Use-Case 10: To Triggered Scan on any specific category and get Email Report .
        Script flow of execution: Script  trigger a scan on a specified category like "Unsecured" and later send email report for the triggered scan.
                                  
        
