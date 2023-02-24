@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin
 
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,tier:,tags:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,category:,tier:,tags:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -49,9 +49,9 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
                     --app_endPointUrl) ENDPOINT_URL="$2"; shift;;
                     --app_token_param) TOKEN_PARAM="$2"; shift;;  
 		    
-		    
+		            --category) CAT="$2"; shift;;
                     --tier) TIER="$2"; shift;;		    
-                    --tags) FX_TAGS="$2"; shift;;		    
+                    --tags) FX_TAGS="$2"; shift;;		                    
                     --) shift;;
              esac
              shift;
@@ -641,7 +641,7 @@ case "$TIER" in "tier1")  URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}
                           echo "The request is $url" ;
                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 *)       URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+                 *)       URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=${CAT}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
                           #echo "Default Category will be run: 'Broken_Authentication' "
                           echo " "

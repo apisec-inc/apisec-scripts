@@ -86,5 +86,13 @@
                No email report will come with use-cases 1,2 and 3 while registering project, but will come while updating a project.
                
                --emailReport "true" --reportType "RUN_SUMMARY"
+
+##       Use-Case 10: To Get Triggered Scan on any specific category and get Email Report .
+       Script flow of execution: Script  trigger a scan on a specified category like "Unsecured" and later send email report for the triggered scan.
+                                 
+       
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --emailReport <true/false> --reportType <RUN_SUMMARY/RUN_DETAIL/PROJECT_SUMMARY/ PROJECT_DETAIL/PROJECT_PEN_TEST_REPORT/DEVELOPER_REPORT/COMPLIANCE> --category <type-of-category-to-scan>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --emailReport "true"       --reportType "RUN_SUMMARY"               --category "Unsecured" 
+       
                
        
