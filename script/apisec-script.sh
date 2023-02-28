@@ -14,7 +14,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
                     --username) FX_USER="$2"; shift;;
                     --password) FX_PWD="$2"; shift;;
                     --project) FX_PROJECT_NAME="$2"; shift;;
-                    --profile) JOB_NAME="$2"; shift;;                    
+                    --profile) PROFILE_NAME="$2"; shift;;                    
                     --scanner) REGION="$2"; shift;;
                     --outputfile) OUTPUT_FILENAME="$2"; shift;;
 		    
@@ -71,8 +71,8 @@ then
 FX_HOST="https://cloud.apisec.ai"
 fi
 
-if   [ "$JOB_NAME" == ""  ]; then
-        JOB_NAME=Master
+if   [ "$PROFILE_NAME" == ""  ]; then
+        PROFILE_NAME=Master
 fi
 
 FX_SCRIPT=""
@@ -597,55 +597,55 @@ fi
 #url=$( echo "$URL" | sed 's/ /%20/g' )
 #echo "The request is $url"
 
-case "$TIER" in "tier1")  URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=InvalidAuth,%20InvalidAuthEmpty,%20InvalidAuthSQL,%20Unsecured&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+case "$TIER" in "tier0")  URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=InvalidAuth,%20InvalidAuthEmpty,%20InvalidAuthSQL,%20Unsecured&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
                           echo "Tier 1 Categories will be run: 'Broken_Authentication' 'InvalidAuth' 'InvalidAuthEmpty' 'InvalidAuthSQL'" ;
                           echo " "
                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
                           echo "The request is $url" ;
                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
-                 "tier2") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=ABAC_Level1,%20ABAC_Level2,%20ABAC_Level3,%20RBAC&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+                 "tier1") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=ABAC_Level1,%20ABAC_Level2,%20ABAC_Level3,%20RBAC&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
                           echo "Tier 2 Categories will be run: 'ABAC_Level1' ABAC_Level2' 'ABAC_Level3' 'RBAC'" ;
                           echo " "
                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
                           echo "The request is $url" ;
                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 "tier3") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=Linux_Command_Injection,%20NoSQL_Injection,%20sql_injection_timebound,%20NoSQL_Injection_Filter,%20sql_injection_filter,%20XSS_Injection,%20Windows_Command_Injection,%20log4j_injection&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+                 "tier2") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=Linux_Command_Injection,%20NoSQL_Injection,%20sql_injection_timebound,%20NoSQL_Injection_Filter,%20sql_injection_filter,%20XSS_Injection,%20Windows_Command_Injection,%20log4j_injection&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
                           echo "Tier 3 Categories will be run: 'Linux_Command_Injection' 'NoSQL_Injection' 'Sql_injection_timebound' 'NoSQL_Injection_Filter' 'Sql_injection_filter' 'XSS_Injection' 'Windows_Command_Injection' 'Log4j_injection'" ;
                           echo " "
                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
                           echo "The request is $url" ;
                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 "tier4") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=open_api_spec_compliance,%20disable_user_after_5_failed_login_attempts,%20error_logging,%20insufficient_logging,%20insufficient_monitoring,%20resource_not_found_logging,%20strong_and_unique_password&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+                 "tier3") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=open_api_spec_compliance,%20disable_user_after_5_failed_login_attempts,%20error_logging,%20insufficient_logging,%20insufficient_monitoring,%20resource_not_found_logging,%20strong_and_unique_password&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
                           echo "Tier 4 Categories will be run: 'Open_api_spec_compliance' 'Disable_user_after_5_failed_login_attempts' 'Error_logging' 'Insufficient_logging' 'Insufficient_monitoring' 'Resource_not_found_logging' 'Strong_and_unique_password' " ;
                           echo " "
                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
                           echo "The request is $url" ;
                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 "tier5") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=cors_config,%20tls_headers,%20http_authentication_scheme,%20insecure_cookies&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+                 "tier4") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=cors_config,%20tls_headers,%20http_authentication_scheme,%20insecure_cookies&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
                           echo "Tier 5 Categories will be run: 'Cors_config' 'Tls_headers' 'Http_authentication_scheme' 'Insecure_cookies' " ;
                           echo " "
                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
                           echo "The request is $url" ;
                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 "tier6") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&&categories=ADoS,%20ratelimit_authenticated,%20ratelimit_unauthenticated&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+                 "tier5") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&&categories=ADoS,%20ratelimit_authenticated,%20ratelimit_unauthenticated&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
                           echo "Tier 6 Categories will be run: 'ADoS' 'Ratelimit_authenticated' 'Ratelimit_unauthenticated' " ;
                           echo " "
                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
                           echo "The request is $url" ;
                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 "tier7") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=Excessive_Data_Exposure,%20Incremental_Ids,%20incremental_ids_l2,%20Pii,%20Sensitive_Data_Exposure,%20sensitive_data_exposure_l2&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+                 "tier6") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=Excessive_Data_Exposure,%20Incremental_Ids,%20incremental_ids_l2,%20Pii,%20Sensitive_Data_Exposure,%20sensitive_data_exposure_l2&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
                           echo "Tier 7 Categories will be run: 'Excessive_Data_Exposure' 'Incremental_Ids' 'Incremental_ids_l2' 'PII' 'Sensitive_Data_Exposure' 'Sensitive_data_exposure_l2' " ;
                           echo " "
                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
                           echo "The request is $url" ;
                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 *)       URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&categories=${CAT}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+                 *)       URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=${CAT}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
                           #echo "Default Category will be run: 'Broken_Authentication' "
                           echo " "
@@ -664,7 +664,7 @@ if [ "$runId" == null ]
 then
           echo "RunId = " "$runId"
           echo "Invalid runid"
-          echo $(curl -s --location --request POST "${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+          echo $(curl -s --location --request POST "${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
           exit 1
 fi
 
