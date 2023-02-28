@@ -71,6 +71,10 @@ then
 FX_HOST="https://cloud.apisec.ai"
 fi
 
+if   [ "$JOB_NAME" == ""  ]; then
+        JOB_NAME=Master
+fi
+
 FX_SCRIPT=""
 if [ "$FX_TAGS" != "" ];
 then
