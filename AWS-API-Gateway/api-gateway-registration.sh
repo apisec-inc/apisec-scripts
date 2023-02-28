@@ -44,6 +44,17 @@ sessiontoken=$(aws sts get-session-token --duration-seconds 129600 | jq -r '.Cre
 
 echo "generated session-token is:" $sessiontoken
 
-curl -s -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "https://cloud.apisec.ai/api/v1/accounts" --header "Authorization: Bearer "$token"" -d  '{"org":{},"isDefaultStore":false,"isdefault":false,"autoOnboard":false,"prop1":"BASIC","prop3":"PRODUCT","name":"'${NAME}'","accountType":"'${ACCOUNT_TYPE}'","region":"'${REGION}'","accessKey":"'${ACCESS_KEY}'","secretKey":"'${SECRET_KEY}'","sessiontoken":"'${sessiontoken}'"}'
+Data=$(curl -s -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/accounts" --header "Authorization: Bearer "$token"" -d  '{"org":{},"isDefaultStore":false,"isdefault":false,"autoOnboard":false,"prop1":"BASIC","prop3":"PRODUCT","name":"'${NAME}'","accountType":"'${ACCOUNT_TYPE}'","region":"'${REGION}'","accessKey":"'${ACCESS_KEY}'","secretKey":"'${SECRET_KEY}'","sessiontoken":"'${sessiontoken}'"}' | jq -r '.data')
+
+APIGateWayId=$( jq -r '.id' <<< "$Data")
+APIGateWayName=$( jq -r '.name' <<< "$Data")
+APIGateWayRegion=$( jq -r '.region' <<< "$Data")
+APIGateWayAccountType=$( jq -r '.accountType' <<< "$Data")
+
+echo "APIGateWayName: $APIGateWayName"
+echo "APIGateWayId: $APIGateWayId"
+echo "APIGateWayAccountType: $APIGateWayAccountType"
+echo "APIGateWayRegion: $APIGateWayRegion"
+echo " "
 
 echo "Successfully Register the AWS API Gateway."
