@@ -1,10 +1,15 @@
 Pre-requisite 
 
 1. AWS command-line(CLI) need to install (This is for to generate session-token)
+
        --> curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+       
        --> bunzip awscliv2.zip
+       
        --> sudo ./aws/install
+ 
  2. Client has to generate and pass secret-key and access-key. Session-token will be generate by shell script        
+ 
  
 How to run the script.
   
