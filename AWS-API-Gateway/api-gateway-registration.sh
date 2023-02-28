@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin
 
-TEMP=$(getopt -n "$0" -a -l "hostname:,username:,password:,accesskey:,secretkey:,name:,sessiontoken:,accountType:,region:,tags:" -- --  "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,accesskey:,secretkey:,name:,sessiontoken:,accountType:,region:,tags:" -- --  "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -10,7 +10,7 @@ TEMP=$(getopt -n "$0" -a -l "hostname:,username:,password:,accesskey:,secretkey:
     while [ $# -gt 0 ]
     do
              case "$1" in
-                    --hostname) FX_HOST="$2"; shift;;
+                    --host) FX_HOST="$2"; shift;;
                     --username) FX_USER="$2"; shift;;
                     --password) FX_PWD="$2"; shift;;
                     --accesskey) ACCESS_KEY="$2"; shift;;
@@ -33,7 +33,7 @@ fi
 
 echo "Now Generating Token"
 
-token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' "https://${FX_HOST}/login" | jq -r .token)
+token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' "${FX_HOST}/login" | jq -r .token)
 
 echo "generated token is:" $token
 echo ' '          	
