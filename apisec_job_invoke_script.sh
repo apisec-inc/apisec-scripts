@@ -72,6 +72,7 @@ FX_HOST="https://cloud.apisec.ai"
 fi
 
 if [ "$FX_PROJECT_NAME" != "" ]; then
+      PROJECT_NAME=$( echo "$FX_PROJECT_NAME" | sed 's/-/ /g' | sed 's/@/ /g' | sed 's/#/ /g' |  sed 's/&/ /g' | sed 's/*/ /g' |  sed 's/(/ /g' | sed 's/)/ /g' | sed 's/=/ /g' | sed 's/+/ /g' | sed 's/~/ /g' | sed 's/\// /g' | sed 's/\\/ /g' | sed 's/\^/ /g' | sed 's/\;/ /g' | sed 's/\:/ /g' | sed 's/\[/ /g' | sed 's/\]/ /g' | sed 's/\./ /g' | sed 's/\,/ /g')
       FX_PROJECT_NAME=$( echo "$FX_PROJECT_NAME" | sed 's/ /%20/g' |  sed 's/-/%20/g' | sed 's/@/%20/g' | sed 's/#/%20/g' |  sed 's/&/%20/g' | sed 's/*/%20/g' |  sed 's/(/%20/g' | sed 's/)/%20/g' | sed 's/=/%20/g' | sed 's/+/%20/g' | sed 's/~/%20/g' | sed 's/\//%20/g' | sed 's/\\/%20/g' | sed 's/\^/%20/g' | sed 's/\;/%20/g' | sed 's/\:/%20/g' | sed 's/\[/%20/g' | sed 's/\]/%20/g' | sed 's/\./%20/g' | sed 's/\,/%20/g')
 fi
 
@@ -149,19 +150,18 @@ token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'$
 
 echo "generated token is:" $token
 echo " "     
-
 # For Project Registeration via OpenSpecUrl
 if [ "$OAS" = true ]; then
 
-     getProjectName=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
+     getProjectName=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')          
      if [ "$getProjectName" == null ];then
-                data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${FX_PROJECT_NAME}"'","openAPISpec":"'${OPEN_API_SPEC_URL}'","planType":"ENTERPRISE","isFileLoad": false,"source":"FILE","personalizedCoverage":{"auths":[]}}' | jq -r '.data')                
+                echo "Registering Project '${PROJECT_NAME}' via OpenAPISpecUrl method!!"
+                data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"'${OPEN_API_SPEC_URL}'","planType":"ENTERPRISE","isFileLoad": false,"source":"FILE","personalizedCoverage":{"auths":[]}}' | jq -r '.data')                
                 project_name=$(jq -r '.name' <<< "$data")
                 project_id=$(jq -r '.id' <<< "$data")
                 sleep 5
                 dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
-                projectId=$(echo "$dto" | jq -r '.id')
-
+                projectId=$(echo "$dto" | jq -r '.id')                
                 curl -s -X PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto" > /dev/null
      
                 playbookTaskStatus="In_progress"
@@ -181,7 +181,7 @@ if [ "$OAS" = true ]; then
                             playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                             #playbookTaskStatus="In_progress"
                             if [ "$playbookTaskStatus" == "Done" ]; then
-                                 echo "Playbooks generation task for the registered project $FX_PROJECT_NAME is succesfully completed!!!"                                 
+                                 echo "Playbooks generation task for the registered project '$PROJECT_NAME' is succesfully completed!!!"                                 
                                  echo "ProjectName: $project_name"
                                  echo "ProjectId: $project_id"
                                  echo 'Script Execution is Done.'
@@ -198,11 +198,11 @@ if [ "$OAS" = true ]; then
                 REFRESH_PLAYBOOKS=false
 
      else
-             echo "Updating Project ${FX_PROJECT_NAME} via OpenAPISpecUrl method!!"                          
+             echo "Updating Project '${PROJECT_NAME}' via OpenAPISpecUrl method!!"
              dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
              projectId=$(echo "$dto" | jq -r '.id')
              orgId=$(echo "$dto" | jq -r '.org.id')             
-             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'${FX_PROJECT_NAME}'","openAPISpec":"'${OPEN_API_SPEC_URL}'","openText": "","isFileLoad":false}' | jq -r '.data')
+             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'"${PROJECT_NAME}"'","openAPISpec":"'${OPEN_API_SPEC_URL}'","openText": "","isFileLoad":false}' | jq -r '.data')
              echo ' '             
              project_name=$(jq -r '.name' <<< "$data")
              project_id=$(jq -r '.id' <<< "$data")
@@ -223,8 +223,9 @@ if [ "$OAS" = true ]; then
                         playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                 
                         if [ "$playbookTaskStatus" == "Done" ]; then
+                              echo " "
                               echo "Project update via OpenAPISpecUrl  and playbooks refresh task is succesfully completed!!!"
-                              echo "ProjectName: $project_name"
+                              echo "ProjectName: '$project_name'"
                               echo "ProjectId: $project_id"
                               echo " "
                               #echo 'Script Execution is Done.'
@@ -259,8 +260,8 @@ if [ "$OASFile" = true ]; then
 
       getProjectNameFile=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
       if [ "$getProjectNameFile" == null ]; then
-             echo "Registering Project ${FX_PROJECT_NAME} via fileupload method!!"
-             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECT_NAME}'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "API","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
+             echo "Registering Project '${PROJECT_NAME}' via fileupload method!!"
+             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "API","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
 
              echo ' '
              project_name=$(jq -r '.name' <<< "$data")
@@ -278,11 +279,11 @@ if [ "$OASFile" = true ]; then
                     exit 0
              fi
       else
-             echo "Updating Project ${FX_PROJECT_NAME} via fileupload method!!"
+             echo "Updating Project '${PROJECT_NAME}' via fileupload method!!"
              dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
              projectId=$(echo "$dto" | jq -r '.id')
              orgId=$(echo "$dto" | jq -r '.org.id')
-             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'${FX_PROJECT_NAME}'","openAPISpec":"None","openText": '${openText}',"isFileLoad":true}' | jq -r '.data')
+             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'"${PROJECT_NAME}"'","openAPISpec":"None","openText": '${openText}',"isFileLoad":true}' | jq -r '.data')
              echo ' '
              project_name=$(jq -r '.name' <<< "$data")
              project_id=$(jq -r '.id' <<< "$data")
@@ -345,8 +346,8 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
       fi      
       getProjectNameFile=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
       if [ "$getProjectNameFile" == null ]; then
-             echo "Registering Project ${FX_PROJECT_NAME} via fileupload method!!"
-             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECT_NAME}'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "API","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
+             echo "Registering Project '${PROJECT_NAME}' via fileupload method!!"
+             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "API","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
 
              echo ' '
              project_name=$(jq -r '.name' <<< "$data")
@@ -364,11 +365,11 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
                     exit 0
              fi
       else
-             echo "Updating Project ${FX_PROJECT_NAME} via fileupload method!!"
+             echo "Updating Project '${PROJECT_NAME}' via fileupload method!!"
              dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
              projectId=$(echo "$dto" | jq -r '.id')
              orgId=$(echo "$dto" | jq -r '.org.id')
-             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'${FX_PROJECT_NAME}'","openAPISpec":"None","openText": '${openText}',"isFileLoad":true}' | jq -r '.data')
+             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'"${PROJECT_NAME}"'","openAPISpec":"None","openText": '${openText}',"isFileLoad":true}' | jq -r '.data')
              echo ' '
              project_name=$(jq -r '.name' <<< "$data")
              project_id=$(jq -r '.id' <<< "$data")
