@@ -49,7 +49,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
                     --app_endPointUrl) ENDPOINT_URL="$2"; shift;;
                     --app_token_param) TOKEN_PARAM="$2"; shift;;  
 		    
-		            --category) CAT="$2"; shift;;
+		        --category) CAT="$2"; shift;;
                     --tier) TIER="$2"; shift;;		    
                     --tags) FX_TAGS="$2"; shift;;		                    
                     --) shift;;
@@ -69,6 +69,10 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
 if [ "$FX_HOST" = "" ];
 then
 FX_HOST="https://cloud.apisec.ai"
+fi
+
+if [ "$FX_PROJECT_NAME" != "" ]; then
+      FX_PROJECT_NAME=$( echo "$FX_PROJECT_NAME" | sed 's/ /%20/g' |  sed 's/-/%20/g' | sed 's/@/%20/g' | sed 's/#/%20/g' |  sed 's/&/%20/g' | sed 's/*/%20/g' |  sed 's/(/%20/g' | sed 's/)/%20/g' | sed 's/=/%20/g' | sed 's/+/%20/g' | sed 's/~/%20/g' | sed 's/\//%20/g' | sed 's/\\/%20/g' | sed 's/\^/%20/g' | sed 's/\;/%20/g' | sed 's/\:/%20/g' | sed 's/\[/%20/g' | sed 's/\]/%20/g' | sed 's/\./%20/g' | sed 's/\,/%20/g')
 fi
 
 if   [ "$PROFILE_NAME" == ""  ]; then
@@ -144,17 +148,14 @@ fi
 token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
 
 echo "generated token is:" $token
-echo " "
-
+echo " "     
 
 # For Project Registeration via OpenSpecUrl
 if [ "$OAS" = true ]; then
 
      getProjectName=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
-
-     if [ "$getProjectName" == null ];
-     then
-                data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECT_NAME}'","openAPISpec":"'${OPEN_API_SPEC_URL}'","planType":"ENTERPRISE","isFileLoad": false,"personalizedCoverage":{"auths":[]}}' | jq -r '.data')                
+     if [ "$getProjectName" == null ];then
+                data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${FX_PROJECT_NAME}"'","openAPISpec":"'${OPEN_API_SPEC_URL}'","planType":"ENTERPRISE","isFileLoad": false,"source":"FILE","personalizedCoverage":{"auths":[]}}' | jq -r '.data')                
                 project_name=$(jq -r '.name' <<< "$data")
                 project_id=$(jq -r '.id' <<< "$data")
                 sleep 5
@@ -694,11 +695,27 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                         echo "-----------------------------------------------"
                         echo "Scan Successfully Completed"
                         echo " "
-			            if [ "$OUTPUT_FILENAME" != "" ];then
+                        if [ "$FX_EMAIL_REPORT" = true ]; then     
+                              sleep 10
+                              echo "Will wait for 10 seconds"                       
+                              totalEScount=$(curl -s -X GET "${FX_HOST}/api/v1/runs/${runId}/test-suite-responses" -H "accept: */*"  --header "Authorization: Bearer "$token""  | jq -r '.data[]|.id')
+                              totalPGcount=$(curl -s -X GET "${FX_HOST}/api/v1/runs/${runId}" -H "accept: */*"  --header "Authorization: Bearer "$token""  | jq -r '.data.task.totalTests')
+                              esCount=0 
+                              for scan in ${totalEScount}
+                                  do
+                                       escount=`expr $escount + 1`
+                                  done
+                                  if [ $totalPGcount -eq $escount ]; then
+                                        echo "Email report will be sent in a short while!!"
+                                  else
+                                        echo "Email report will be not sent as there is discrepency of total no tests run between Elasticsearch and Postgres databases!!"
+                                  fi
+                        fi
+			      if [ "$OUTPUT_FILENAME" != "" ];then
                               sarifoutput=$(curl -s --location --request GET "${FX_HOST}/api/v1/projects/${projectId}/sarif" --header "Authorization: Bearer "$token"" | jq  '.data')
-		                      #echo $sarifoutput >> $OUTPUT_FILENAME
+		                  #echo $sarifoutput >> $OUTPUT_FILENAME
                               echo $sarifoutput >> $GITHUB_WORKSPACE/$OUTPUT_FILENAME
-               		          echo "SARIF output file created successfully"
+               		      echo "SARIF output file created successfully"
                               echo " "
                         fi
                         if [ "$FAIL_ON_VULN_SEVERITY_FLAG" = true ]; then
