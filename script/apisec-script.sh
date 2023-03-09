@@ -709,7 +709,7 @@ while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                                   if [ $totalPGcount -eq $escount ]; then
                                         echo "Email report will be sent in a short while!!"
                                   else
-                                        echo "Email report will be not sent as there is discrepency of total no tests run between Elasticsearch and Postgres databases!!"
+                                        echo "Email report will be sent after some delay!!"
                                   fi
                         fi
 			      if [ "$OUTPUT_FILENAME" != "" ];then
