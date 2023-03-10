@@ -47,8 +47,14 @@
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password <app password>  --app_endPointUrl <app's complete token endpoint url>         --app_token_param <token param to filter generated token>
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --authName "ROLE_PM"     --app_username "user1@netbanking.io"   --app_password "admin@1234"    --app_endPointUrl "https://netbanking.apisec.ai:8080/login"   --app_token_param ".info.token"
        
+##       Use-Case 6: To Configure a Project's BaseUrl.
+       Script flow of execution: Script will update ```baseUrl``` of an exisitng environment like ```Master``` in an existing project and later trigger a scan.
+                                 
+       
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --baseUrl <baseUrl-of-the-openApiSpec>   
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --baseUrl   "http://netbanking.apisec.ai:8080"
 
-##       Use-Case 6: To Configure a Project's Profile with a scanner.
+##       Use-Case 7: To Configure a Project's Profile with a scanner.
        Script flow of execution: Script will update/configure a scanner of an existing profile  like ```Master``` in an existing project and later trigger a scan.
                                  
        
@@ -58,14 +64,14 @@
        Note!!: If no profile name is passed with this use-case then Master profile will get configured with the passed scanner.
 
 
-##       Use-Case 7: To Refresh/Reload  a Project's SPecs.
+##       Use-Case 8: To Refresh/Reload  a Project's SPecs.
        Script flow of execution: Script will Refresh/Reload of an existing project specs and later trigger a scan.
                                  
        
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --refresh-playbooks <true/false>
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --refresh-playbooks "true"
 
-##       Use-Case 8: To Fail script execution for a Vulnerability.
+##       Use-Case 9: To Fail script execution for a Vulnerability.
        Script flow of execution: Script will trigger a scan and will fail script execution upon finding passed severity vulnerability like 'Critical'.
                                  Script will check 'Critical', 'High' and 'Medium' severities vulnerabilities.
                                  
@@ -73,7 +79,7 @@
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --fail-on-vuln-severity <Critical/High/Medium>
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --fail-on-vuln-severity "Critical"
 
-##       Use-Case 9: To Get Triggered Scan Email Report .
+##       Use-Case 10: To Get Triggered Scan Email Report .
        Script flow of execution: Script  trigger a scan and later send email report for the triggered scan.
                                  
        
@@ -87,7 +93,7 @@
                
                --emailReport "true" --reportType "RUN_SUMMARY"
 
-##       Use-Case 10: To Triggered Scan on any specific category and get Email Report .
+##       Use-Case 11: To Triggered Scan on any specific category and get Email Report .
        Script flow of execution: Script  trigger a scan on a specified category like "Unsecured" and later send email report for the triggered scan.
                                  
        
