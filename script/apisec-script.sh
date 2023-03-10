@@ -47,11 +47,12 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
                     --app_username) APP_USER="$2"; shift;;
                     --app_password) APP_PWD="$2"; shift;; 
                     --app_endPointUrl) ENDPOINT_URL="$2"; shift;;
-                    --app_token_param) TOKEN_PARAM="$2"; shift;;  
-		        # To update BaseUrl
+                    --app_token_param) TOKEN_PARAM="$2"; shift;;
+		    
+		    # To update BaseUrl
                     --baseUrl) BASE_URL="$2"; shift;;
 
-		        --category) CAT="$2"; shift;;
+		    --category) CAT="$2"; shift;;
                     --tier) TIER="$2"; shift;;		    
                     --tags) FX_TAGS="$2"; shift;;		                    
                     --) shift;;
