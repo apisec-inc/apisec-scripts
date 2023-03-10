@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin
 
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,category:,tier:,tags:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,baseUrl:,category:,tier:,tags:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -49,7 +49,10 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
                     --app_endPointUrl) ENDPOINT_URL="$2"; shift;;
                     --app_token_param) TOKEN_PARAM="$2"; shift;;  
 		    
-		        --category) CAT="$2"; shift;;
+		    # To update BaseUrl
+                    --baseUrl) BASE_URL="$2"; shift;;
+
+		    --category) CAT="$2"; shift;;
                     --tier) TIER="$2"; shift;;		    
                     --tags) FX_TAGS="$2"; shift;;		                    
                     --) shift;;
@@ -116,6 +119,10 @@ else
 
 fi
 
+# For Refreshing Project Playbooks
+if   [ "$REFRESH_PLAYBOOKS" == ""  ]; then
+        REFRESH_PLAYBOOKS=false
+fi
 
 # For Project Profile To be Updated with a scanner
 if   [ "$PROFILE_SCANNER" != ""  ];  then
@@ -139,11 +146,12 @@ then
     TOKEN_PARAM=".info.token"
 fi
 
-# For Refreshing Project Playbooks
-if   [ "$REFRESH_PLAYBOOKS" == ""  ]; then
-        REFRESH_PLAYBOOKS=false
+# For Project BaseUrl Update
+if   [ "$BASE_URL" == ""  ]; then
+        BASE_URL_FLAG=false
+else 
+        BASE_URL_FLAG=true
 fi
-
 
 
 token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
@@ -593,7 +601,36 @@ if   [ "$AUTH_FLAG" = true  ]; then
 
 fi
 
+# For Project BaseUrl Update
+if [ "$BASE_URL_FLAG" = true ]; then 
+      dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
+      PROJECT_ID=$(echo "$dto" | jq -r '.id')
+      data=$(curl -s --location --request GET "${FX_HOST}/api/v1/envs/projects/${PROJECT_ID}?page=0&pageSize=25" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[]')
+      for row in $(echo "${data}" | jq -r '. | @base64'); 
+         do
+               _jq() {
+                    echo ${row} | base64 --decode | jq -r ${1}
+                }
+                eName=$(echo $(_jq '.') | jq  -r '.name')
+                eId=$(echo $(_jq '.') | jq  -r '.id') 
+    
+               if [ "$ENV_NAME" == "$eName"  ]; then
+                     echo "Updating $ENV_NAME environment with $BASE_URL as baseurl in $PROJECT_NAME project!!"
+                     dto=$(echo $(_jq '.') | jq '.baseUrl = "'${BASE_URL}'"')
+                     updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/projects/$PROJECT_ID/env/$eId" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto" | jq -r '.data')
+                     updatedBaseUrl=$(echo "$updatedData" | jq -r '.baseUrl')
+                     
+                     echo " "
+                     echo "ProjectName: $PROJECT_NAME"
+                     echo "ProjectId: $PROJECT_ID"
+                     echo "EnvironmentName: $ENV_NAME"
+                     echo "EnvironmentId: $eId"
+                     echo "UpdatedBaseUrl: $updatedBaseUrl"
+                     echo " "                    
+               fi
+        done
 
+fi
 #URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"
 #URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${JOB_NAME}&region=${REGION}&&categories=ABAC_Level1,%20ABAC_Level2,%20ABAC_Level3,%20InvalidAuth,%20InvalidAuthEmpty,%20InvalidAuthSQL,%20Unsecured,%20Excessive_Data_Exposure,%20Incremental_Ids,%20incremental_ids_l2,%20Pii,%20Sensitive_Data_Exposure,%20sensitive_data_exposure_l2,%20ADoS,%20ratelimit_authenticated,%20ratelimit_unauthenticated,%20RBAC,%20cors_config,%20tls_headers,%20http_authentication_scheme,%20Linux_Command_Injection,%20NoSQL_Injection,%20sql_injection_timebound,%20NoSQL_Injection_Filter,%20sql_injection_filter,%20XSS_Injection,%20Windows_Command_Injection,%20open_api_spec_compliance,%20disable_user_after_5_failed_login_attempts,%20error_logging,%20insufficient_logging,%20insufficient_monitoring,%20log4j_injection,%20resource_not_found_logging,%20strong_and_unique_password,%20insecure_cookies,%20SLA,%20SimpleGET&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}"
 #url=$( echo "$URL" | sed 's/ /%20/g' )
