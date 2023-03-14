@@ -52,7 +52,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
 		    # To update BaseUrl
                     --baseUrl) BASE_URL="$2"; shift;;
 
-		    --category) CAT="$2"; shift;;
+                    --category) CAT="$2"; shift;;
                     --tier) TIER="$2"; shift;;		    
                     --tags) FX_TAGS="$2"; shift;;		                    
                     --) shift;;
@@ -164,47 +164,56 @@ if [ "$OAS" = true ]; then
      getProjectName=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')          
      if [ "$getProjectName" == null ];then
                 echo "Registering Project '${PROJECT_NAME}' via OpenAPISpecUrl method!!"
-                data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"'${OPEN_API_SPEC_URL}'","planType":"ENTERPRISE","isFileLoad": false,"source":"FILE","personalizedCoverage":{"auths":[]}}' | jq -r '.data')                
+                response=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"'${OPEN_API_SPEC_URL}'","planType":"ENTERPRISE","isFileLoad": false,"source":"FILE","personalizedCoverage":{"auths":[]}}')
+                message=$(jq -r '.messages' <<< "$response")                          
+                data=$(jq -r '.data' <<< "$response")
                 project_name=$(jq -r '.name' <<< "$data")
                 project_id=$(jq -r '.id' <<< "$data")
+
                 sleep 5
-                dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
-                projectId=$(echo "$dto" | jq -r '.id')                
-                curl -s -X PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto" > /dev/null
-     
-                playbookTaskStatus="In_progress"
-                echo "playbookTaskStatus = " $playbookTaskStatus
-                retryCount=0
-                pCount=0
+                #dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
+                #projectId=$(echo "$dto" | jq -r '.id')                
+                #curl -s -X PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto" > /dev/null
+                if [ -z "$project_id" ] || [  "$project_id" == null ]; then
+                        echo "Project Id is $project_id/empty" > /dev/null
+                        echo "Error Message: $message"
+                        echo " "
+                        exit 1
+                else
+                        playbookTaskStatus="In_progress"
+                        echo "playbookTaskStatus = " $playbookTaskStatus
+                        retryCount=0
+                        pCount=0
 
-                while [ "$playbookTaskStatus" == "In_progress" ]
-                        do
-                            if [ $pCount -eq 0 ]; then
-                                 echo "Checking playbooks generate task Status...."
-                            fi
-                            pCount=`expr $pCount + 1`  
-                            retryCount=`expr $retryCount + 1`  
-                            sleep 2
+                        while [ "$playbookTaskStatus" == "In_progress" ]
+                                 do
+                                      if [ $pCount -eq 0 ]; then
+                                           echo "Checking playbooks generate task Status...."
+                                      fi
+                                      pCount=`expr $pCount + 1`  
+                                      retryCount=`expr $retryCount + 1`  
+                                      sleep 2
 
-                            playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
-                            #playbookTaskStatus="In_progress"
-                            if [ "$playbookTaskStatus" == "Done" ]; then
-                                 echo "Playbooks generation task for the registered project '$PROJECT_NAME' is succesfully completed!!!"                                 
-                                 echo "ProjectName: $project_name"
-                                 echo "ProjectId: $project_id"
-                                 echo 'Script Execution is Done.'
-                                 exit 0
-                            fi
+                                      playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${project_id}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
+                                      #playbookTaskStatus="In_progress"
+                                      if [ "$playbookTaskStatus" == "Done" ]; then
+                                            echo " "
+                                            echo "Playbooks generation task for the registered project '$PROJECT_NAME' is succesfully completed!!!"                                 
+                                            echo "ProjectName: '$project_name'"
+                                            echo "ProjectId: $project_id"
+                                            echo 'Script Execution is Done.'
+                                            exit 0
+                                      fi
 
-                            if [ $retryCount -ge 55  ]; then
-                                 echo " "
-                                 retryCount=`expr $retryCount \* 2`  
-                                 echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
-                                 exit 1
-                            fi
-                        done
-                REFRESH_PLAYBOOKS=false
-
+                                      if [ $retryCount -ge 55  ]; then
+                                           echo " "
+                                           retryCount=`expr $retryCount \* 2`  
+                                           echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
+                                           exit 1
+                                      fi
+                                 done
+                        REFRESH_PLAYBOOKS=false
+                fi   
      else
              echo "Updating Project '${PROJECT_NAME}' via OpenAPISpecUrl method!!"
              dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
@@ -257,41 +266,71 @@ if [ "$OASFile" = true ]; then
       if [[ "$fileExt" == *"yaml"* ]] ||  [[ "$fileExt" == *"yml"* ]]; then
              echo "yaml file upload option is used."
              openText=$(yq -r -o=json $openText)
-             openText=$(echo $openText |  jq . -R |  tr -d ' ')
+             openText=$(echo $openText |  jq . -Rc)
       fi
 
       if [[ "$fileExt" == *"json"* ]]; then
              echo "json file upload option is used."
              openText=$(cat "$openText" )
-             openText=$(echo $openText |  jq . -R |  tr -d ' ')
+             openText=$(echo $openText |  jq . -Rc )
       fi
 
       getProjectNameFile=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
       if [ "$getProjectNameFile" == null ]; then
-             echo "Registering Project '${PROJECT_NAME}' via fileupload method!!"
-             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "API","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
-
+             echo "Registering Project '${PROJECT_NAME}' via fileupload method!!"                          
+             response=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '"${openText}"',"source": "API","personalizedCoverage":{"auths":[]}}')                                       
+             message=$(jq -r '.messages' <<< "$response")                          
+             data=$(jq -r '.data' <<< "$response")
              echo ' '
              project_name=$(jq -r '.name' <<< "$data")
              project_id=$(jq -r '.id' <<< "$data")
 
              if [ -z "$project_id" ] || [  "$project_id" == null ]; then
                    echo "Project Id is $project_id/empty" > /dev/null
+                   echo "Error Message: $message"
+                   echo " "
                    exit 1
              else
-      
-                    echo "Successfully created the project."
-                    echo "ProjectName: $project_name"
-                    echo "ProjectId: $project_id"
-                    echo 'Script Execution is Done.'
-                    exit 0
+
+                  playbookTaskStatus="In_progress"
+                  echo "playbookTaskStatus = " $playbookTaskStatus
+                  retryCount=0
+                  pCount=0
+
+                  while [ "$playbookTaskStatus" == "In_progress" ]
+                            do
+                                if [ $pCount -eq 0 ]; then
+                                      echo "Checking playbooks generate task Status...."
+                                fi
+                                pCount=`expr $pCount + 1`  
+                                retryCount=`expr $retryCount + 1`  
+                                sleep 2
+
+                                playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${project_id}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
+                                #playbookTaskStatus="In_progress"
+                                if [ "$playbookTaskStatus" == "Done" ]; then
+                                       echo " "
+                                       echo "Playbooks generation task for the registered project '$PROJECT_NAME' is succesfully completed!!!"                                 
+                                       echo "ProjectName: '$project_name'"
+                                       echo "ProjectId: $project_id"
+                                       echo 'Script Execution is Done.'
+                                       exit 0
+                                fi
+
+                                if [ $retryCount -ge 55  ]; then
+                                       echo " "
+                                       retryCount=`expr $retryCount \* 2`  
+                                       echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
+                                       exit 1
+                                fi
+                            done      
              fi
       else
              echo "Updating Project '${PROJECT_NAME}' via fileupload method!!"
              dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
              projectId=$(echo "$dto" | jq -r '.id')
              orgId=$(echo "$dto" | jq -r '.org.id')
-             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'"${PROJECT_NAME}"'","openAPISpec":"None","openText": '${openText}',"isFileLoad":true}' | jq -r '.data')
+             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'"${PROJECT_NAME}"'","openAPISpec":"None","openText": '"${openText}"',"isFileLoad":true}' | jq -r '.data')
              echo ' '
              project_name=$(jq -r '.name' <<< "$data")
              project_id=$(jq -r '.id' <<< "$data")
@@ -313,6 +352,7 @@ if [ "$OASFile" = true ]; then
                         playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                 
                         if [ "$playbookTaskStatus" == "Done" ]; then
+                              echo " "
                               echo "OpenAPISpecFile upload and playbooks refresh task is succesfully completed!!!"
                               echo "ProjectName: $project_name"
                               echo "ProjectId: $project_id"
@@ -327,7 +367,8 @@ if [ "$OASFile" = true ]; then
                              echo "Playbook Regenerate Task Status is $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
                              exit 1
                         fi                            
-                    done       
+                    done    
+   
 
       fi
 
@@ -338,9 +379,10 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
       fileExt=$(echo $SPEC_TYPE)
       if [[ "$fileExt" == *"yaml"* ]] ||  [[ "$fileExt" == *"yml"* ]]; then
              echo "yaml file upload option is used."
-             wget $INTERNAL_OPEN_API_SPEC_URL -O open-api-spec.yaml             
+             wget $INTERNAL_OPEN_API_SPEC_URL -O open-api-spec.yaml
+             openText1=open-api-spec.yaml            
              openText=$(yq -r -o=json $openText1)
-             openText=$(echo $openText |  jq . -R |  tr -d ' ')
+             openText=$(echo $openText |  jq . -Rc)
              rm -rf open-api-spec.yaml
       fi
 
@@ -349,35 +391,67 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
              wget $INTERNAL_OPEN_API_SPEC_URL -O open-api-spec.json
              openText1=open-api-spec.json             
              openText=$(cat "$openText1" )
-             openText=$(echo $openText |  jq . -R |  tr -d ' ')
+             openText=$(echo $openText |  jq . -Rc)
              rm -rf open-api-spec.json
       fi      
       getProjectNameFile=$(curl -s -X GET "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" -H "accept: */*"  --header "Authorization: Bearer "$token"" | jq -r '.data|.name')
       if [ "$getProjectNameFile" == null ]; then
              echo "Registering Project '${PROJECT_NAME}' via fileupload method!!"
-             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "API","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
-
+             response=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '"${openText}"',"source": "API","personalizedCoverage":{"auths":[]}}')                                       
+             message=$(jq -r '.messages' <<< "$response")                          
+             data=$(jq -r '.data' <<< "$response")
              echo ' '
              project_name=$(jq -r '.name' <<< "$data")
              project_id=$(jq -r '.id' <<< "$data")
+             #data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'"${PROJECT_NAME}"'","openAPISpec":"none","planType":"ENTERPRISE","isFileLoad": "true","openText": '${openText}',"source": "API","personalizedCoverage":{"auths":[]}}'  | jq -r '.data') 
+
+            #  echo ' '
+            #  project_name=$(jq -r '.name' <<< "$data")
+            #  project_id=$(jq -r '.id' <<< "$data")
 
              if [ -z "$project_id" ] || [  "$project_id" == null ]; then
                    echo "Project Id is $project_id/empty" > /dev/null
+                   echo "Error Message: $message"
                    exit 1
              else
-      
-                    echo "Successfully created the project."
-                    echo "ProjectName: $project_name"
-                    echo "ProjectId: $project_id"
-                    echo 'Script Execution is Done.'
-                    exit 0
+                  playbookTaskStatus="In_progress"
+                  echo "playbookTaskStatus = " $playbookTaskStatus
+                  retryCount=0
+                  pCount=0
+
+                  while [ "$playbookTaskStatus" == "In_progress" ]
+                            do
+                                  if [ $pCount -eq 0 ]; then
+                                        echo "Checking playbooks generate task Status...."
+                                  fi
+                                  pCount=`expr $pCount + 1`  
+                                  retryCount=`expr $retryCount + 1`  
+                                  sleep 10
+                                  playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${project_id}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
+                                  #playbookTaskStatus="In_progress"
+                                  if [ "$playbookTaskStatus" == "Done" ]; then
+                                         echo " "
+                                         echo "Playbooks generation task for the registered project '$PROJECT_NAME' is succesfully completed!!!"                                 
+                                         echo "ProjectName: '$project_name'"
+                                         echo "ProjectId: $project_id"
+                                         echo 'Script Execution is Done.'
+                                         exit 0
+                                  fi
+
+                                  if [ $retryCount -ge 55  ]; then
+                                         echo " "
+                                         retryCount=`expr $retryCount \* 2`  
+                                         echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
+                                         exit 1
+                                  fi
+                            done
              fi
       else
              echo "Updating Project '${PROJECT_NAME}' via fileupload method!!"
              dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
              projectId=$(echo "$dto" | jq -r '.id')
              orgId=$(echo "$dto" | jq -r '.org.id')
-             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'"${PROJECT_NAME}"'","openAPISpec":"None","openText": '${openText}',"isFileLoad":true}' | jq -r '.data')
+             data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" --header "Authorization: Bearer "$token"" -d  '{"id":"'${projectId}'","org":{"id":"'${orgId}'"},"name":"'"${PROJECT_NAME}"'","openAPISpec":"None","openText": '"${openText}"',"isFileLoad":true}' | jq -r '.data')
              echo ' '
              project_name=$(jq -r '.name' <<< "$data")
              project_id=$(jq -r '.id' <<< "$data")
