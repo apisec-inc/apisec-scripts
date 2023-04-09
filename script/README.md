@@ -101,4 +101,9 @@
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --emailReport "true"       --reportType "RUN_SUMMARY"               --category "Unsecured" 
        
                
+##       Use-Case 12: To Triggered Scan on any specific Scanner .
+       Script flow of execution: Script  trigger a scan on a specified scanner like Super_1 .
+                                 
        
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name>  --scanner <scanner_name>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                    --scanner "Super_1"
