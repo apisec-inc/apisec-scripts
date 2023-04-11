@@ -124,12 +124,11 @@ if   [ "$REFRESH_PLAYBOOKS" == ""  ]; then
 fi
 
 # For Project Profile To be Updated with a scanner
-if   [ "$PROFILE_SCANNER" == ""  ];  then
+if   [ "$PROFILE_SCANNER" == ""  ] || [ "$PROFILE_NAME" == ""  ];  then
         PROFILE_SCANNER_FLAG=false
 else 
         PROFILE_SCANNER_FLAG=true
         SCANNER_NAME=$(echo $PROFILE_SCANNER)
-        PROFILE_NAME=$(echo $PROFILE_NAME)
 fi
 
 # To check scanner exists
@@ -544,17 +543,24 @@ if [ "$SCANNER_NAME_FLAG" = true ]; then
            exit 1
       elif [ $errorsFlag = false ]; then            
             scanCount=0            
-            scanners_Names=$(jq -r '.data[].name' <<< "$scanData")
-            org_Name=$(echo "$scanData" | jq -r '.data[].org.name')
-            org_Name=$(echo "$org_Name" | sort -u)            
+            scanners_Names=$(jq -r '.data[].name' <<< "$scanData")           
             for sName in ${scanners_Names}
                do 
                    if [ "$sName" == "$REGION" ]; then   
                          scanCount=`expr $scanCount + 1`  
-                  fi
-               done  
+                   fi
+               done
+            superScanData=$(curl -s --location --request GET "$FX_HOST/api/v1/bot-clusters/superbotnetwork?page=0&pageSize=20&sort=createdDate&sortType=DESC"  --header "Authorization: Bearer "$token"")
+            super_scanners_Names=$(jq -r '.data[].name' <<< "$superScanData")
+            for sName in ${super_scanners_Names}
+               do 
+                   if [ "$sName" == "$REGION" ]; then   
+                         scanCount=`expr $scanCount + 1`  
+                   fi
+               done
+
             if [ $scanCount -le 0 ]; then
-                 echo "$REGION scanner doesn't exists in $org_Name Tenant/Org!!"
+                 echo "$REGION scanner doesn't exists!!"
                  exit 1
             fi
 
@@ -631,10 +637,18 @@ if [ "$PROFILE_SCANNER_FLAG" = true ]; then
                do 
                    if [ "$sName" == "$PROFILE_SCANNER" ]; then   
                          scanCount=`expr $scanCount + 1`  
-                  fi
-               done  
+                   fi
+               done
+            superScanData=$(curl -s --location --request GET "$FX_HOST/api/v1/bot-clusters/superbotnetwork?page=0&pageSize=20&sort=createdDate&sortType=DESC"  --header "Authorization: Bearer "$token"")
+            super_scanners_Names=$(jq -r '.data[].name' <<< "$superScanData")
+            for sName in ${super_scanners_Names}
+               do 
+                   if [ "$sName" == "$PROFILE_SCANNER" ]; then   
+                         scanCount=`expr $scanCount + 1`  
+                   fi
+               done               
             if [ $scanCount -le 0 ]; then
-                 echo "$PROFILE_SCANNER scanner doesn't exists in $org_Name Tenant/Org!!"
+                 echo "$PROFILE_SCANNER scanner doesn't exists!!"
                  exit 1
             fi
 
@@ -644,10 +658,12 @@ if [ "$PROFILE_SCANNER_FLAG" = true ]; then
                              echo ${row} | base64 --decode | jq -r ${1}
                        }
                        profName=$(echo $(_jq '.') | jq  -r '.name')
-                       profId=$(echo $(_jq '.') | jq  -r '.id')     
+                       profId=$(echo $(_jq '.') | jq  -r '.id')    
                        if [ "$PROFILE_NAME" == "$profName"  ]; then
                               echo "Updating $PROFILE_NAME profile with $SCANNER_NAME scanner in $FX_PROJECT_NAME project!!"
                               udto=$(echo $(_jq '.') | jq '.regions = "'${SCANNER_NAME}'"')
+                              envId=$(echo $(_jq '.') | jq '.environment.id')
+                              envName=$(echo $(_jq '.') | jq '.environment.name')
                               updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto")
                               #updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data')
                               uErrorsFlag=$(echo $updatedData | jq -r '.errors')
@@ -661,7 +677,9 @@ if [ "$PROFILE_SCANNER_FLAG" = true ]; then
                                      updatedScanner=$(echo "$updatedProfData" | jq -r '.regions')
                                      echo " "
                                      echo "ProjectName: $FX_PROJECT_NAME"
-                                     echo "ProjectId: $PROJECT_ID"                                                                         
+                                     echo "ProjectId: $PROJECT_ID"
+                                     echo "EnvironmentName: $envName"
+                                     echo "EnvironmentId: $envId"                                                                                                            
                                      echo "ProfileName: $PROFILE_NAME"                                                                                                                                                                                        
                                      echo "ProfileId: $profId"
                                      echo "UpdatedScannerName: $updatedScanner"
@@ -737,7 +755,7 @@ if   [ "$AUTH_FLAG" = true  ]; then
 
                                                                            if [ $uErrorsFlag = true ]; then     
                                                                                  errMsg=$(echo "$updatedResp" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')                                                                  
-                                                                                 echo $errM                                                                                                                                                                                                                                                                                                                                                                                                                  
+                                                                                 echo $errMsg                                                                                                                                                                                                                                                                                                                                                                                                                  
                                                                                  exit 1
                                                                            elif [ $uErrorsFlag = false ]; then
                                                                                    updatedData=$(echo "$updatedResp" | jq -r '.data') 
@@ -773,7 +791,7 @@ if   [ "$AUTH_FLAG" = true  ]; then
 
                                                                            if [ $uErrorsFlag = true ]; then     
                                                                                  errMsg=$(echo "$updatedResp" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')                                                                  
-                                                                                 echo $errM                                                                                                                                                                                                                                                                                                                                                                                                                  
+                                                                                 echo $errMsg                                                                                                                                                                                                                                                                                                                                                                                                                  
                                                                                  exit 1
                                                                            elif [ $uErrorsFlag = false ]; then
                                                                                    updatedData=$(echo "$updatedResp" | jq -r '.data') 
@@ -801,8 +819,10 @@ if   [ "$AUTH_FLAG" = true  ]; then
                                                          "Token")   if [ "$authName" == "$AUTH_NAME" ]; then 
                                                                            echo "Updating '$AUTH_NAME' Auth with Token as AuthType of '$ENV_NAME' environment in '$FX_PROJECT_NAME' project!!"
                                                                            echo " "  
-                                                                           auth='Authorization: Bearer {{@CmdCache | curl -s -d '\'{"username":"${APP_USER}","password":"${APP_PWD}"}\'' -H '"Content-Type: application/json"' -H '"Accept: application/json"' -X POST '${ENDPOINT_URL}' | jq --raw-output '"'${TOKEN_PARAM}'"' }}'                                                                
-                                                                           bAuth=$(echo $updatedAuths1 | jq 'map(select(.name == "'${AUTH_NAME}'") |= (.header_1 = "'"${auth}"'" ))' | jq -c . )
+                                                                           #auth='Authorization: Bearer {{@CmdCache | curl -s -d '\'{"username":"${APP_USER}","password":"${APP_PWD}"}\'' -H '"Content-Type: application/json"' -H '"Accept: application/json"' -X POST '${ENDPOINT_URL}' | jq --raw-output '"'${TOKEN_PARAM}'"' }}'                                                                
+                                                                           #bAuth=$(echo $updatedAuths1 | jq 'map(select(.name == "'${AUTH_NAME}'") |= (.header_1 = "'"${auth}"'" ))' | jq -c . )
+                                                                           auth='Authorization: Bearer {{@CmdCache | curl -s -d '\'{"\"""username"\""":"\"""${APP_USER}"\""","\"""password"\""":"\"""${APP_PWD}"\"""}\'' -H '\'"Content-Type: application/json"\'' -H '\'"Accept: application/json"\'' -X POST '${ENDPOINT_URL}' | jq --raw-output '"'${TOKEN_PARAM}'"' }}'                                                                     
+                                                                           bAuth=$(echo $updatedAuths1 | jq --arg path "$auth" 'map(select(.name == "'${AUTH_NAME}'") |= (.header_1 = $path ))' | jq -c . )                                                                                                                                                      
                                                                            udto=$(echo $(_jq '.') | jq '.auths = '"${bAuth}"'')
                                                                            #updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/projects/$PROJECT_ID/env/$eId" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data') 
                                                                            updatedResp=$(curl -s --location --request PUT "${FX_HOST}/api/v1/projects/$PROJECT_ID/env/$eId" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto")
@@ -810,7 +830,7 @@ if   [ "$AUTH_FLAG" = true  ]; then
 
                                                                            if [ $uErrorsFlag = true ]; then     
                                                                                  errMsg=$(echo "$updatedResp" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')                                                                  
-                                                                                 echo $errM                                                                                                                                                                                                                                                                                                                                                                                                                  
+                                                                                 echo $errMsg                                                                                                                                                                                                                                                                                                                                                                                                                  
                                                                                  exit 1
                                                                            elif [ $uErrorsFlag = false ]; then
                                                                                    updatedData=$(echo "$updatedResp" | jq -r '.data') 
@@ -829,7 +849,7 @@ if   [ "$AUTH_FLAG" = true  ]; then
                                                                                                      echo "EnvironmentName: $ENV_NAME" 
                                                                                                      echo "EnvironmentId: $eId" 
                                                                                                      echo "UpdatedAuth: $updatedAuthObj"
-                                                                                                     echo " "
+                                                                                                     echo " "                                                                                                     
                                                                                               fi
                                                                                        done
                                                                            fi 

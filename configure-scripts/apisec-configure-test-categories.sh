@@ -58,89 +58,147 @@ elif [ "$FX_TIER" = "tier1" ];then
         CAT_TIER="Unsecured,cors_config,disable_user_after_5_failed_login_attempts,error_logging,Excessive_Data_Exposure,Incremental_Ids"        
 fi
 
-token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
-
-echo "generated token is:" $token
-echo " "
-
-dto=$(curl  -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
-PROJECT_ID=$(echo "$dto" | jq -r '.id')
-
-pdto=$(echo $dto |  tr -d ' ')
-
-data=$(curl -s --location --request GET "${FX_HOST}/api/v1/jobs/project-id/${PROJECT_ID}?page=0&pageSize=20&sort=modifiedDate%2CcreatedDate&sortType=DESC"  --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[]')
-
-prof_names=$(jq -r '.name' <<< "$data")
-prof_names_count=( $prof_names )
-prof_names_count=$(echo ${#prof_names_count[*]})
-
-lCount=0
-for prof in ${prof_names}
-    do
-         if [ "$PROFILE_NAME" != "$prof" ]; then
-               lCount=`expr $lCount + 1` 
-         fi      
-    done
-if [ $lCount -eq $prof_names_count ]; then      
-    envData=$(curl -s --location --request GET "${FX_HOST}/api/v1/envs/projects/${PROJECT_ID}?page=0&pageSize=25" --header "Accept: application/json"  --header "accept: */*" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[]')
-    for row in $(echo "${envData}" | jq -r '. | @base64'); 
-         do
-               _jq() {
-                    echo ${row} | base64 --decode | jq -r ${1}
-                }
-                envName=$(echo $(_jq '.') | jq  -r '.name')
-                envId=$(echo $(_jq '.') | jq  -r '.id')
-                 
-               if [ "$ENV_NAME" == "$envName"  ]; then     
-                     if [ "$FX_TIER" != "" ]; then            
-                           echo "Creating $PROFILE_NAME profile with $FX_TIER test categories in $FX_PROJECT_NAME project!!"
-                           echo "$FX_TIER consists of these categories: $CAT_TIER "
-                     fi
-                     envID=$(echo "$envId")                                                       
-                     Data=$(curl -s --location --request POST "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d '{"environment":{"auths":[],"baseUrl":"","id":"'${envID}'"},"tags":[],"regions":"","issueTracker":{},"project": '${pdto}',"logPolicy":"DEBUG","timeZone":"","name":"'${PROFILE_NAME}'","cron":"","categories":"'${CAT_TIER}'"}' | jq -r '.data')
-                     updatedCategories=$(echo "$Data" | jq -r '.categories')
-                     profID=$(echo "$Data" | jq -r '.id')                     
-                     echo " "
-                     echo "ProjectName: $FX_PROJECT_NAME"
-                     echo "ProjectId: $PROJECT_ID"
-                     echo "ProfileName: $PROFILE_NAME"
-                     echo "ProfileId: $profID"
-                     echo "UpdatedCategoriesList: $updatedCategories"
-                     echo " "                 
-                     
-
-               fi
-        done
-
-else
-     for row in $(echo "${data}" | jq -r '. | @base64'); 
-         do
-               _jq() {
-                    echo ${row} | base64 --decode | jq -r ${1}
-                }
-                profName=$(echo $(_jq '.') | jq  -r '.name')
-                profId=$(echo $(_jq '.') | jq  -r '.id')     
-               if [ "$PROFILE_NAME" == "$profName"  ]; then
-                     if [ "$FX_TIER" != "" ]; then
-                           echo "Updating $PROFILE_NAME profile with $FX_TIER test categores in $FX_PROJECT_NAME project!!"
-                           echo "$FX_TIER consists of these categories: $CAT_TIER "
-                     fi
-                     udto=$(echo $(_jq '.') | jq '.categories = "'${CAT_TIER}'"')
-                     updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data')
-                     updatedCategories=$(echo "$updatedData" | jq -r '.categories')
-                     
-                     echo " "
-                     echo "ProjectName: $FX_PROJECT_NAME"
-                     echo "ProjectId: $PROJECT_ID"
-                     echo "ProfileName: $PROFILE_NAME"
-                     echo "ProfileId: $profId"
-                     echo "UpdatedCategoriesList: $updatedCategories"
-                     echo " "                 
-                     
-
-               fi
-        done
-      
+if    [ "$FX_TIER" == ""  ] || [ "$PROFILE_NAME" == ""  ]; then
+        PROFILE_SCANNER_FLAG=false
+else 
+        PROFILE_SCANNER_FLAG=true
 fi
 
+tokenResp=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login )
+#tokenResp1=$(echo "$tokenResp" | jq -r . | cut -d: -f1 | cut -d{ -f1 | cut -d} -f2 | cut -d'"' -f2)
+tokenResp1=$(echo "$tokenResp" | jq -r . | cut -d: -f1 | tr -d '{' | tr -d '}' | tr -d '"') 
+if [ $tokenResp1 == "token" ];then
+      token=$(echo $tokenResp | jq -r '.token')
+      echo "generated token is:" $token
+      echo " "  
+elif [ $tokenResp1 == "message" ];then  
+       message=$(echo $tokenResp | jq -r '.message')
+       echo "$message. Please provide correct User Credentials!!"
+       echo " "
+       exit 1
+fi
+
+dtoData=$(curl  -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"")
+errorsFlag=$(echo "$dtoData" | jq -r '.errors')      
+if [ $errorsFlag = true ]; then           
+      errMsg=$(echo "$dtoData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')
+      echo $errMsg
+      exit 1
+elif [ $errorsFlag = false ]; then            
+       dto=$(echo "$dtoData" | jq -r '.data')
+       PROJECT_ID=$(echo "$dto" | jq -r '.id')
+       getProjectName=$(echo "$dtoData" | jq -r '.data.name')
+       pdto=$(echo $dto |  tr -d ' ')
+       #echo $getProjectName
+fi
+
+#dto=$(curl  -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
+#PROJECT_ID=$(echo "$dto" | jq -r '.id')
+
+#pdto=$(echo $dto |  tr -d ' ')
+if [ "$PROFILE_SCANNER_FLAG" = true ]; then
+
+      data=$(curl -s --location --request GET "${FX_HOST}/api/v1/jobs/project-id/${PROJECT_ID}?page=0&pageSize=20&sort=modifiedDate%2CcreatedDate&sortType=DESC"  --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[]')
+
+      prof_names=$(jq -r '.name' <<< "$data")
+      prof_names_count=( $prof_names )
+      prof_names_count=$(echo ${#prof_names_count[*]})
+
+      lCount=0
+      for prof in ${prof_names}
+         do
+             if [ "$PROFILE_NAME" != "$prof" ]; then
+                   lCount=`expr $lCount + 1` 
+             fi      
+         done
+      if [ $lCount -eq $prof_names_count ]; then      
+           envData=$(curl -s --location --request GET "${FX_HOST}/api/v1/envs/projects/${PROJECT_ID}?page=0&pageSize=25" --header "Accept: application/json"  --header "accept: */*" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[]')
+           EnvNames=$(echo $envData | jq -r '.name')
+           EnvCount=0    
+           for eName in ${EnvNames}
+               do 
+                  if [ "$eName" == "$ENV_NAME" ]; then   
+                        EnvCount=`expr $EnvCount + 1`  
+                  fi
+               done  
+            if [ $EnvCount -le 0 ]; then
+                 echo "$ENV_NAME environment doesn't exists in $PROJECT_NAME project!!"
+                 exit 1
+            fi 
+            for row in $(echo "${envData}" | jq -r '. | @base64'); 
+                do
+                      _jq() {
+                            echo ${row} | base64 --decode | jq -r ${1}
+                      }
+                      envName=$(echo $(_jq '.') | jq  -r '.name')
+                      envId=$(echo $(_jq '.') | jq  -r '.id')
+                 
+                      if [ "$ENV_NAME" == "$envName"  ]; then     
+                            if [ "$FX_TIER" != "" ]; then            
+                                  echo "Creating $PROFILE_NAME profile with $FX_TIER test categories in $FX_PROJECT_NAME project!!"
+                                  echo "$FX_TIER consists of these categories: $CAT_TIER "
+                            fi
+                            envID=$(echo "$envId")                                                       
+                            #Data=$(curl -s --location --request POST "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d '{"environment":{"auths":[],"baseUrl":"","id":"'${envID}'"},"tags":[],"regions":"","issueTracker":{},"project": '${pdto}',"logPolicy":"DEBUG","timeZone":"","name":"'${PROFILE_NAME}'","cron":"","categories":"'${CAT_TIER}'"}' | jq -r '.data')
+                            DataResp=$(curl -s --location --request POST "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d '{"environment":{"auths":[],"baseUrl":"","id":"'${envID}'"},"tags":[],"regions":"","issueTracker":{},"project": '${pdto}',"logPolicy":"DEBUG","timeZone":"","name":"'${PROFILE_NAME}'","cron":"","categories":"'${CAT_TIER}'"}')
+                            uErrorsFlag=$(echo $DataResp | jq -r '.errors')
+                            if [ $uErrorsFlag = true ]; then     
+                                 errMsg=$(echo "$DataResp" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')                              
+                                 echo $errMsg
+                                 exit 1
+                            elif [ $uErrorsFlag = false ]; then
+                                    Data=$(echo "$DataResp" | jq -r '.data')
+                                    updatedCategories=$(echo "$Data" | jq -r '.categories')
+                                    profID=$(echo "$Data" | jq -r '.id')                     
+                                    echo " "
+                                    echo "ProjectName: $FX_PROJECT_NAME"
+                                    echo "ProjectId: $PROJECT_ID"
+                                    echo "ProfileName: $PROFILE_NAME"
+                                    echo "ProfileId: $profID"
+                                    echo "UpdatedCategoriesList: $updatedCategories"
+                                    echo " "                                      
+                            fi         
+                      fi
+                done
+
+      else
+          for row in $(echo "${data}" | jq -r '. | @base64'); 
+              do
+                    _jq() {
+                          echo ${row} | base64 --decode | jq -r ${1}
+                    }
+                    profName=$(echo $(_jq '.') | jq  -r '.name')
+                    profId=$(echo $(_jq '.') | jq  -r '.id')     
+                    if [ "$PROFILE_NAME" == "$profName"  ]; then
+                         if [ "$FX_TIER" != "" ]; then
+                               echo "Updating $PROFILE_NAME profile with $FX_TIER test categores in $FX_PROJECT_NAME project!!"
+                               echo "$FX_TIER consists of these categories: $CAT_TIER "
+                         fi
+                         udto=$(echo $(_jq '.') | jq '.categories = "'${CAT_TIER}'"')
+                         #updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data')
+                         updatedDataResp=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto")
+                         uErrorsFlag=$(echo $DataResp | jq -r '.errors')
+                         if [ $uErrorsFlag = true ]; then     
+                               errMsg=$(echo "$updatedDataResp" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')                              
+                               echo $errMsg
+                               exit 1
+                         elif [ $uErrorsFlag = false ]; then
+                                  updatedData=$(echo "$updatedDataResp" | jq -r '.data')
+                                  updatedCategories=$(echo "$updatedData" | jq -r '.categories')
+                                  profID=$(echo "$updatedData" | jq -r '.id')                     
+                                  echo " "
+                                  echo "ProjectName: $FX_PROJECT_NAME"
+                                  echo "ProjectId: $PROJECT_ID"
+                                  echo "ProfileName: $PROFILE_NAME"
+                                  echo "ProfileId: $profID"
+                                  echo "UpdatedCategoriesList: $updatedCategories"
+                                  echo " "                                      
+                         fi                                   
+
+                    fi
+              done
+      
+      fi
+
+fi
 echo "Script Execution is finished."

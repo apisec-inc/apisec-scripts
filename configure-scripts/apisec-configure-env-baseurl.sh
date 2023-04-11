@@ -39,16 +39,40 @@ then
 FX_HOST="https://cloud.apisec.ai"
 fi
 
-token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login | jq -r .token)
+tokenResp=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login )
+#tokenResp1=$(echo "$tokenResp" | jq -r . | cut -d: -f1 | cut -d{ -f1 | cut -d} -f2 | cut -d'"' -f2)
+tokenResp1=$(echo "$tokenResp" | jq -r . | cut -d: -f1 | tr -d '{' | tr -d '}' | tr -d '"') 
+if [ $tokenResp1 == "token" ];then
+      token=$(echo $tokenResp | jq -r '.token')
+      echo "generated token is:" $token
+      echo " "  
+elif [ $tokenResp1 == "message" ];then  
+       message=$(echo $tokenResp | jq -r '.message')
+       echo "$message. Please provide correct User Credentials!!"
+       echo " "
+       exit 1
+fi
 
-echo "generated token is:" $token
-echo " "
 
-dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
-PROJECT_ID=$(echo "$dto" | jq -r '.id')
-data=$(curl -s --location --request GET "${FX_HOST}/api/v1/envs/projects/${PROJECT_ID}?page=0&pageSize=25" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[]')
+dtoData=$(curl  -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"")
+errorsFlag=$(echo "$dtoData" | jq -r '.errors')      
+if [ $errorsFlag = true ]; then           
+      errMsg=$(echo "$dtoData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')
+      echo $errMsg
+      exit 1
+elif [ $errorsFlag = false ]; then            
+       dto=$(echo "$dtoData" | jq -r '.data')
+       PROJECT_ID=$(echo "$dto" | jq -r '.id')
+       getProjectName=$(echo "$dtoData" | jq -r '.data.name')
+       #echo $getProjectName
+fi
 
-env_names=$(jq -r '.name' <<< "$data")
+
+# dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
+# PROJECT_ID=$(echo "$dto" | jq -r '.id')
+envdata=$(curl -s --location --request GET "${FX_HOST}/api/v1/envs/projects/${PROJECT_ID}?page=0&pageSize=25" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[]')
+
+env_names=$(jq -r '.name' <<< "$envdata")
 env_names_count=( $env_names )
 env_names_count=$(echo ${#env_names_count[*]})
 
@@ -61,19 +85,28 @@ for env in ${env_names}
     done
 if [ $lCount -eq $env_names_count ]; then      
       echo "Creating $ENV_NAME environment with $BASE_URL as baseurl in $FX_PROJECT_NAME project!!"
-      Data=$(curl -s --location --request POST "${FX_HOST}/api/v1/envs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d '{"auths":[],"name":"'${ENV_NAME}'","baseUrl":"'${BASE_URL}'","projectId":"'${PROJECT_ID}'"}' | jq -r '.data')
-      createdBaseUrl=$(echo "$Data" | jq -r '.baseUrl')
-      createdEnvID=$(echo "$Data" | jq -r '.id')
-      echo " "
-      echo "ProjectName: $FX_PROJECT_NAME"
-      echo "ProjectId: $PROJECT_ID"
-      echo "EnvironmentName: $ENV_NAME"
-      echo "EnvironmentId: $createdEnvID"
-      echo "UpdatedBaseUrl: $createdBaseUrl"
-      echo " "
+      #Data=$(curl -s --location --request POST "${FX_HOST}/api/v1/envs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d '{"auths":[],"name":"'${ENV_NAME}'","baseUrl":"'${BASE_URL}'","projectId":"'${PROJECT_ID}'"}' | jq -r '.data')
+      baseData=$(curl -s --location --request POST "${FX_HOST}/api/v1/envs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d '{"auths":[],"name":"'${ENV_NAME}'","baseUrl":"'${BASE_URL}'","projectId":"'${PROJECT_ID}'"}')
+      uErrorsFlag=$(echo $baseData | jq -r '.errors')
+      if [ $uErrorsFlag = true ]; then     
+           errMsg=$(echo "$updatedData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')                                                                  
+           echo $errMsg
+           exit 1
+      elif [ $uErrorsFlag = false ]; then 
+             Data=$(echo $baseData | jq -r '.data')
+             createdBaseUrl=$(echo "$Data" | jq -r '.baseUrl')
+             createdEnvID=$(echo "$Data" | jq -r '.id')
+             echo " "
+             echo "ProjectName: $FX_PROJECT_NAME"
+             echo "ProjectId: $PROJECT_ID"
+             echo "EnvironmentName: $ENV_NAME"
+             echo "EnvironmentId: $createdEnvID"
+             echo "UpdatedBaseUrl: $createdBaseUrl"
+             echo " "
+      fi
 
 else
-     for row in $(echo "${data}" | jq -r '. | @base64'); 
+     for row in $(echo "${envdata}" | jq -r '. | @base64'); 
          do
                _jq() {
                     echo ${row} | base64 --decode | jq -r ${1}
@@ -84,16 +117,26 @@ else
                if [ "$ENV_NAME" == "$eName"  ]; then
                      echo "Updating $ENV_NAME environment with $BASE_URL as baseurl in $FX_PROJECT_NAME project!!"
                      dto=$(echo $(_jq '.') | jq '.baseUrl = "'${BASE_URL}'"')
-                     updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/projects/$PROJECT_ID/env/$eId" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto" | jq -r '.data')
-                     updatedBaseUrl=$(echo "$updatedData" | jq -r '.baseUrl')
-                     
-                     echo " "
-                     echo "ProjectName: $FX_PROJECT_NAME"
-                     echo "ProjectId: $PROJECT_ID"
-                     echo "EnvironmentName: $ENV_NAME"
-                     echo "EnvironmentId: $eId"
-                     echo "UpdatedBaseUrl: $updatedBaseUrl"
-                     echo " "                 
+                     updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/projects/$PROJECT_ID/env/$eId" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto")
+                     uErrorsFlag=$(echo $updatedData | jq -r '.errors')
+
+                           if [ $uErrorsFlag = true ]; then     
+                                 errMsg=$(echo "$updatedData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')                                                                  
+                                 echo $errMsg
+                                 exit 1
+                           elif [ $uErrorsFlag = false ]; then 
+                                  #exit 1
+                                  updatedBaseData=$(echo $updatedData | jq -r '.data')
+                                  #updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/projects/$PROJECT_ID/env/$eId" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto" | jq -r '.data')
+                                  updatedBaseUrl=$(echo "$updatedBaseData" | jq -r '.baseUrl')
+                                  echo " "
+                                  echo "ProjectName: $FX_PROJECT_NAME"
+                                  echo "ProjectId: $PROJECT_ID"
+                                  echo "EnvironmentName: $ENV_NAME"
+                                  echo "EnvironmentId: $eId"
+                                  echo "UpdatedBaseUrl: $updatedBaseUrl"
+                                  echo " "                    
+                           fi                 
                      
 
                fi
