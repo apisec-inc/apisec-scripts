@@ -15,15 +15,15 @@
 # Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "Master"                     --authName "Default"     --app_username "user1@netbanking.io"   --app_password "admin@1234"
 
 # Use-Case 2: To Update credentials of Token AuthType
-# Syntax:        bash apisec-configure-creds.sh --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>" --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password  <app password>  --app_endPointUrl <app's complete token endpoint url>         --app_token_param <token param to filter generated token>
+# Syntax:        bash apisec-configure-creds.sh --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>" --envName <existing-environmentName>   --authName <auth Name>   --header_1 <complete header 1 curl request to  generate token>
 #
-# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "Master"                     --authName "ROLE_PM"     --app_username "user1@netbanking.io"   --app_password  "admin@1234"    --app_endPointUrl "https://netbanking.apisec.ai:8080/login"   --app_token_param ".info.token"
+# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "Master"                     --authName "ROLE_PM"     --header_1 "Authorization: Bearer {{@CmdCache | curl -s -d '{"username":"admin","password":"secret"}' -H "Content-Type: application/json" -H "Accept: application/json" -X POST https://ip/user/login | jq --raw-output ".info.token" }}"
 
 
 
 
 
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,header_1:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -32,7 +32,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,envName:,authNam
     while [ $# -gt 0 ]
     do
              case "$1" in
-		            --host) FX_HOST="$2"; shift;;
+		        --host) FX_HOST="$2"; shift;;
                     --username) FX_USER="$2"; shift;;
                     --password) FX_PWD="$2"; shift;;
                     --project) FX_PROJECT_NAME="$2"; shift;;
@@ -41,7 +41,8 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,envName:,authNam
                     --app_endPointUrl) ENDPOINT_URL="$2"; shift;;       
                     --app_username) APP_USER="$2"; shift;;
                     --app_password) APP_PWD="$2"; shift;; 
-                    --app_token_param) TOKEN_PARAM="$2"; shift;;           
+                    --app_token_param) TOKEN_PARAM="$2"; shift;; 
+                    --header_1) COMPLETE_HEADER1="$2"; shift;;                              
                     --) shift;;
              esac
              shift;
@@ -210,7 +211,8 @@ fi
                                                     "Token")   if [ "$authName" == "$AUTH_NAME" ]; then 
                                                                      echo "Updating '$AUTH_NAME' Auth with Token as AuthType of '$ENV_NAME' environment in '$FX_PROJECT_NAME' project!!"
                                                                      echo " "                                                                       
-                                                                     auth='Authorization: Bearer {{@CmdCache | curl -s -d '\'{"\"""username"\""":"\"""${APP_USER}"\""","\"""password"\""":"\"""${APP_PWD}"\"""}\'' -H '\'"Content-Type: application/json"\'' -H '\'"Accept: application/json"\'' -X POST '${ENDPOINT_URL}' | jq --raw-output '"'${TOKEN_PARAM}'"' }}'                                                                     
+                                                                     #auth='Authorization: Bearer {{@CmdCache | curl -s -d '\'{"\"""username"\""":"\"""${APP_USER}"\""","\"""password"\""":"\"""${APP_PWD}"\"""}\'' -H '\'"Content-Type: application/json"\'' -H '\'"Accept: application/json"\'' -X POST '${ENDPOINT_URL}' | jq --raw-output '"'${TOKEN_PARAM}'"' }}'                                                                     
+                                                                     auth=$(echo $COMPLETE_HEADER1)
                                                                      bAuth=$(echo $updatedAuths1 | jq --arg path "$auth" 'map(select(.name == "'${AUTH_NAME}'") |= (.header_1 = $path ))' | jq -c . )
                                                                      #bAuth=$(echo $updatedAuths1 | jq 'map(select(.name == "'${AUTH_NAME}'") |= (.header_1 = "'"${auth}"'" ))' | jq -c . )
                                                                      echo " "

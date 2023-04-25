@@ -44,8 +44,8 @@
        Script flow of execution: Script will update an auth of type ```Token``` of an exisitng environment like ```Master``` in an existing project and later trigger a scan.
                                  
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password <app password>  --app_endPointUrl <app's complete token endpoint url>         --app_token_param <token param to filter generated token>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --authName "ROLE_PM"     --app_username "user1@netbanking.io"   --app_password "admin@1234"    --app_endPointUrl "https://netbanking.apisec.ai:8080/login"   --app_token_param ".info.token"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --authName <auth Name>   --header_1 <complete header 1 curl request to  generate token>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --authName "ROLE_PM"     --header_1 "Authorization: Bearer {{@CmdCache | curl -s -d '{"username":"admin","password":"secret"}' -H "Content-Type: application/json" -H "Accept: application/json" -X POST https://ip/user/login | jq --raw-output ".info.token" }}"
        
 ##       Use-Case 6: To Configure a Project's BaseUrl.
        Script flow of execution: Script will update ```baseUrl``` of an exisitng environment like ```Master``` in an existing project and later trigger a scan.
