@@ -17,7 +17,7 @@
 # Use-Case 2: To Update credentials of Token AuthType
 # Syntax:        bash apisec-configure-creds.sh --host "<Hostname or IP>"         --username "<username>"      --password "<password>"    --project "<projectname>" --envName <existing-environmentName>   --authName <auth Name>   --header_1 <complete header 1 curl request to  generate token>
 #
-# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "Master"                     --authName "ROLE_PM"     --header_1 "Authorization: Bearer {{@CmdCache | curl -s -d '{"username":"admin","password":"secret"}' -H "Content-Type: application/json" -H "Accept: application/json" -X POST https://ip/user/login | jq --raw-output ".info.token" }}"
+# Example usage: bash apisec-configure-creds.sh --host "https://cloud.apisec.ai"  --username "admin@apisec.ai" --password "apisec@5421"   --project "netbanking"    --envName "Master"                     --authName "ROLE_PM"     --header_1 "Authorization: Bearer {{@CmdCache | curl -s -d '{"username":"admin","password":"secret"}' -H 'Content-Type: application/json' -H 'Accept: application/json' -X POST https://ip/user/login | jq --raw-output '.info.token' }}"
 
 
 
