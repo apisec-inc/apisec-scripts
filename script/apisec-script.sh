@@ -925,266 +925,467 @@ fi
 #url=$( echo "$URL" | sed 's/ /%20/g' )
 #echo "The request is $url"
 
-case "$TIER" in "tier0")  URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=InvalidAuth,%20InvalidAuthEmpty,%20InvalidAuthSQL,%20Unsecured&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
-                          echo "Tier 1 Categories will be run: 'Broken_Authentication' 'InvalidAuth' 'InvalidAuthEmpty' 'InvalidAuthSQL'" ;
-                          echo " "
-                          url=$( echo "$URL" | sed 's/ /%20/g' ) ;
-                          echo "The request is $url" ;
-                          data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
-                 "tier1") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=ABAC_Level1,%20ABAC_Level2,%20ABAC_Level3,%20RBAC&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
-                          echo "Tier 2 Categories will be run: 'ABAC_Level1' ABAC_Level2' 'ABAC_Level3' 'RBAC'" ;
-                          echo " "
-                          url=$( echo "$URL" | sed 's/ /%20/g' ) ;
-                          echo "The request is $url" ;
-                          data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
+# case "$TIER" in "Tier_0")  URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=Tier_0&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+#                           #echo "Tier_0 Profile Categories will be run: 'Missing TLS HSTS Headers' 'SSL Certificate Issues' 'Server Properties Leak in Headers'" ;
+#                           echo "Tier_0 Profile Categories will be scan!!"
+#                           echo " "
+#                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
+#                           echo "The request is $url" ;
+#                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
+#                  "Tier_1") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=Tier_1&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+#                           #echo "Tier_1 Profile Categories will be run: 'CORS Config' 'PII Data Exposure' 'Reflected GET Injection' 'Reflected POST Injection' 'Sensitive Data Exposure' " ;
+#                           echo "Tier_1 Profile Categories will be scan!!"
+#                           echo " "
+#                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
+#                           echo "The request is $url" ;
+#                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 "tier2") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=Linux_Command_Injection,%20NoSQL_Injection,%20sql_injection_timebound,%20NoSQL_Injection_Filter,%20sql_injection_filter,%20XSS_Injection,%20Windows_Command_Injection,%20log4j_injection&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
-                          echo "Tier 3 Categories will be run: 'Linux_Command_Injection' 'NoSQL_Injection' 'Sql_injection_timebound' 'NoSQL_Injection_Filter' 'Sql_injection_filter' 'XSS_Injection' 'Windows_Command_Injection' 'Log4j_injection'" ;
-                          echo " "
-                          url=$( echo "$URL" | sed 's/ /%20/g' ) ;
-                          echo "The request is $url" ;
-                          data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
+#                  "Tier_2") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=Tier_2&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+#                           #echo "Tier_2 Profile Categories will be run: All categories will run" ;
+#                           echo "Tier_2 Profile Categories will be scan!!"
+#                           echo " "
+#                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
+#                           echo "The request is $url" ;
+#                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 "tier3") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=open_api_spec_compliance,%20disable_user_after_5_failed_login_attempts,%20error_logging,%20insufficient_logging,%20insufficient_monitoring,%20resource_not_found_logging,%20strong_and_unique_password&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
-                          echo "Tier 4 Categories will be run: 'Open_api_spec_compliance' 'Disable_user_after_5_failed_login_attempts' 'Error_logging' 'Insufficient_logging' 'Insufficient_monitoring' 'Resource_not_found_logging' 'Strong_and_unique_password' " ;
-                          echo " "
-                          url=$( echo "$URL" | sed 's/ /%20/g' ) ;
-                          echo "The request is $url" ;
-                          data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
+#                  "Tier_3") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=Tier_3&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+#                           #echo "Tier 4 Categories will be run: 'Open_api_spec_compliance' 'Disable_user_after_5_failed_login_attempts' 'Error_logging' 'Insufficient_logging' 'Insufficient_monitoring' 'Resource_not_found_logging' 'Strong_and_unique_password' " ;
+#                           echo "Tier_3 Profile Categories will be scan!!"
+#                           echo " "
+#                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
+#                           echo "The request is $url" ;
+#                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
 
-                 "tier4") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=cors_config,%20tls_headers,%20http_authentication_scheme,%20insecure_cookies&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
-                          echo "Tier 5 Categories will be run: 'Cors_config' 'Tls_headers' 'Http_authentication_scheme' 'Insecure_cookies' " ;
-                          echo " "
-                          url=$( echo "$URL" | sed 's/ /%20/g' ) ;
-                          echo "The request is $url" ;
-                          data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
+#                  *)       URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=${CAT}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
+#                           url=$( echo "$URL" | sed 's/ /%20/g' ) ;
+#                           #echo "Default Category will be run: 'Broken_Authentication' "
+#                           echo " "
+#                           echo "The request is $url" ;
+#                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
+# esac
 
-                 "tier5") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&&categories=ADoS,%20ratelimit_authenticated,%20ratelimit_unauthenticated&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
-                          echo "Tier 6 Categories will be run: 'ADoS' 'Ratelimit_authenticated' 'Ratelimit_unauthenticated' " ;
-                          echo " "
-                          url=$( echo "$URL" | sed 's/ /%20/g' ) ;
-                          echo "The request is $url" ;
-                          data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
+if [ "$PROFILE_NAME" == "Super" ]; then
+      data=$(curl -s --location --request GET "${FX_HOST}/api/v1/jobs/project-id/${PROJECT_ID}?page=0&pageSize=20&sort=modifiedDate%2CcreatedDate&sortType=DESC"  --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[]')
+      ProfNames=$(echo $data | jq -r '.name')
+         for pName in ${ProfNames}
+               do 
+                     if [ "$pName" == "Tier_0" ] || [ "$pName" == "Tier_1" ] || [ "$pName" == "Tier_2" ] || [ "$pName" == "Tier_3" ]; then   
+                           URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${pName}&region=${REGION}&categories=${CAT}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" 
+                           url=$( echo "$URL" | sed 's/ /%20/g' )
+                           echo "The request is $url"
+                           echo " "
+                           data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]')
+                           runId=$( jq -r '.id' <<< "$data")
+                           projectId=$( jq -r '.job.project.id' <<< "$data")
+                           echo "runId =" $runId
+                           if [ "$runId" == null ]
+                           then
+                                     echo "RunId = " "$runId"
+                                     echo "Invalid runid"
+                                     echo $(curl -s --location --request POST "${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${pName}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+                                     exit 1
+                           fi
+                           taskStatus="WAITING"
+                           echo "taskStatus = " $taskStatus
 
-                 "tier6") URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=Excessive_Data_Exposure,%20Incremental_Ids,%20incremental_ids_l2,%20Pii,%20Sensitive_Data_Exposure,%20sensitive_data_exposure_l2&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
-                          echo "Tier 7 Categories will be run: 'Excessive_Data_Exposure' 'Incremental_Ids' 'Incremental_ids_l2' 'PII' 'Sensitive_Data_Exposure' 'Sensitive_data_exposure_l2' " ;
-                          echo " "
-                          url=$( echo "$URL" | sed 's/ /%20/g' ) ;
-                          echo "The request is $url" ;
-                          data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
-
-                 *)       URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=${CAT}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" ;
-                          url=$( echo "$URL" | sed 's/ /%20/g' ) ;
-                          #echo "Default Category will be run: 'Broken_Authentication' "
-                          echo " "
-                          echo "The request is $url" ;
-                          data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]');;
-esac
-
-# data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]')
-runId=$( jq -r '.id' <<< "$data")
-projectId=$( jq -r '.job.project.id' <<< "$data")
-#runId=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
-
-echo "runId =" $runId
-#if [ -z "$runId" ]
-if [ "$runId" == null ]
-then
-          echo "RunId = " "$runId"
-          echo "Invalid runid"
-          echo $(curl -s --location --request POST "${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
-          exit 1
-fi
-
-
-taskStatus="WAITING"
-echo "taskStatus = " $taskStatus
-
-while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
-         do
-                sleep 5
-                 echo "Checking Status...."
-
-                passPercent=$(curl -s --location --request GET "${FX_HOST}/api/v1/runs/${runId}" --header "Authorization: Bearer "$token""| jq -r '.["data"]|.ciCdStatus')
-
-                        IFS=':' read -r -a array <<< "$passPercent"
-
-                        taskStatus="${array[0]}"
-
-                        echo "Status =" "${array[0]}" " Success Percent =" "${array[1]}"  " Total Tests =" "${array[2]}" " Total Failed =" "${array[3]}" " Run =" "${array[6]}"
-                      # VAR2=$(echo "Status =" "${array[0]}" " Success Percent =" "${array[1]}"  " Total Tests =" "${array[2]}" " Total Failed =" "${array[3]}" " Run =" "${array[6]}")      
-
-
-                if [ "$taskStatus" == "COMPLETED" ];then
-                        echo "------------------------------------------------"
-                        #echo  "Run detail link ${FX_HOST}/${array[7]}"
-                        echo  "Run detail link ${FX_HOST}${array[7]}"
-                        echo "-----------------------------------------------"
-                        echo "Scan Successfully Completed"
-                        echo " "
-                        if [ "$FX_EMAIL_REPORT" = true ]; then     
-                              sleep 10
-                              echo "Will wait for 10 seconds"                       
-                              totalEScount=$(curl -s -X GET "${FX_HOST}/api/v1/runs/${runId}/test-suite-responses" -H "accept: */*"  --header "Authorization: Bearer "$token""  | jq -r '.data[]|.id')
-                              totalPGcount=$(curl -s -X GET "${FX_HOST}/api/v1/runs/${runId}" -H "accept: */*"  --header "Authorization: Bearer "$token""  | jq -r '.data.task.totalTests')
-                              esCount=0 
-                              for scan in ${totalEScount}
-                                  do
-                                       escount=`expr $escount + 1`
-                                  done
-                                  if [ $totalPGcount -eq $escount ]; then
-                                        echo "Email report will be sent in a short while!!"
-                                  else
-                                        echo "Email report will be sent after some delay!!"
-                                  fi
-                        fi
-			      if [ "$OUTPUT_FILENAME" != "" ];then
-                              sarifoutput=$(curl -s --location --request GET "${FX_HOST}/api/v1/projects/${projectId}/sarif" --header "Authorization: Bearer "$token"" | jq  '.data')
-		                  #echo $sarifoutput >> $OUTPUT_FILENAME
-                              echo $sarifoutput >> $GITHUB_WORKSPACE/$OUTPUT_FILENAME
-               		      echo "SARIF output file created successfully"
-                              echo " "
-                        fi
-                        if [ "$FAIL_ON_VULN_SEVERITY_FLAG" = true ]; then
-                              severity=$(curl -s -X GET "${FX_HOST}/api/v1/projects/${projectId}/vulnerabilities?&severity=All&page=0&pageSize=20" -H "accept: */*"  "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[] | .severity')
-
-                                cVulCount=0
-                                for vul in ${severity}
+                           while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
                                     do
-                                                
-                                          if [ "$vul" == "Critical"  ]; then
-                                                
-                                               cVulCount=`expr $cVulCount + 1`                                           
+                                           sleep 5
+                                           echo "Checking Status...."
+
+                                           passPercent=$(curl -s --location --request GET "${FX_HOST}/api/v1/runs/${runId}" --header "Authorization: Bearer "$token""| jq -r '.["data"]|.ciCdStatus')
+
+                                                   IFS=':' read -r -a array <<< "$passPercent"
+
+                                                   taskStatus="${array[0]}"
+
+                                                   echo "Status =" "${array[0]}" " Success Percent =" "${array[1]}"  " Total Tests =" "${array[2]}" " Total Failed =" "${array[3]}" " Run =" "${array[6]}"
+                                                   # VAR2=$(echo "Status =" "${array[0]}" " Success Percent =" "${array[1]}"  " Total Tests =" "${array[2]}" " Total Failed =" "${array[3]}" " Run =" "${array[6]}")      
+
+
+                                          if [ "$taskStatus" == "COMPLETED" ];then
+                                                echo "------------------------------------------------"
+                                                #echo  "Run detail link ${FX_HOST}/${array[7]}"
+                                                echo  "Run detail link ${FX_HOST}${array[7]}"
+                                                echo "-----------------------------------------------"
+                                                echo "$pName Profile Categories Scan Successfully Completed!!"
+                                                echo " "
+                                                if [ "$FX_EMAIL_REPORT" = true ]; then     
+                                                      sleep 10
+                                                      echo "Will wait for 10 seconds"                       
+                                                      totalEScount=$(curl -s -X GET "${FX_HOST}/api/v1/runs/${runId}/test-suite-responses" -H "accept: */*"  --header "Authorization: Bearer "$token""  | jq -r '.data[]|.id')
+                                                      totalPGcount=$(curl -s -X GET "${FX_HOST}/api/v1/runs/${runId}" -H "accept: */*"  --header "Authorization: Bearer "$token""  | jq -r '.data.task.totalTests')
+                                                      esCount=0
+                                                      for scan in ${totalEScount}
+                                                          do
+                                                                escount=`expr $escount + 1`
+                                                          done
+                                                      if [ $totalPGcount -eq $escount ]; then
+                                                           echo "Email report will be sent in a short while!!"
+                                                      else
+                                                           echo "Email report will be sent after some delay!!"
+                                                      fi
+                                                fi
+
                                           fi
-
                                     done
-                                echo "Found $cVulCount Critical Severity Vulnerabilities!!!"
-                                echo " "
+                     fi
+               done
 
-                                hVulCount=0
-                                for vul in ${severity}
-                                    do
-                                                
-                                          if [ "$vul" == "High"  ]; then
-                                              hVulCount=`expr $hVulCount + 1`                                           
-                                           
-                                          fi
+         if [ "$OUTPUT_FILENAME" != "" ];then
+               sarifoutput=$(curl -s --location --request GET "${FX_HOST}/api/v1/projects/${PROJECT_ID}/sarif" --header "Authorization: Bearer "$token"" | jq  '.data')
+	         #echo $sarifoutput >> $OUTPUT_FILENAME
+               echo $sarifoutput >> $GITHUB_WORKSPACE/$OUTPUT_FILENAME
+               echo "SARIF output file created successfully"
+               echo " "
+         fi
 
-                                    done
-                                echo "Found $hVulCount High Severity Vulnerabilities!!!"
-                                echo " "
-
-                                majVulCount=0
-                                for vul in ${severity}
-                                    do
-                                                
-                                          if [ "$vul" == "Major"  ]; then
-                                                
-                                               majVulCount=`expr $majVulCount + 1`
-                                          fi
-                                          
-                                    done
-                                echo "Found $majVulCount Major Severity Vulnerabilities!!!"
-                                echo " "
-
-                                medVulCount=0
-                                for vul in ${severity}
-                                    do
-                                                
-                                          if [ "$vul" == "Medium"  ]; then
-                                                
-                                               medVulCount=`expr $medVulCount + 1`
-                                          fi
-                                          
-                                    done
-                                echo "Found $medVulCount Medium Severity Vulnerabilities!!!"
-                                echo " "
-
-                                minVulCount=0
-                                for vul in ${severity}
-                                    do
-                                                
-                                          if [ "$vul" == "Minor"  ]; then
-                                                
-                                              minVulCount=`expr $minVulCount + 1`
-                                          fi
-                                          
-                                    done
-                                echo "Found $minVulCount Minor Severity Vulnerabilities!!!"
-                                echo " "
-
-                                lowVulCount=0
-                                for vul in ${severity}
-                                    do
-                                                
-                                          if [ "$vul" == "Low"  ]; then
-
-                                               lowVulCount=`expr $lowVulCount + 1`  
-                                           
-                                          fi
-                                          
-                                    done
-                                echo "Found $lowVulCount Low Severity Vulnerabilities!!!"
-                                echo " "
-
-                                triVulCount=0
-                                for vul in ${severity}
-                                    do
-                                                
-                                          if [ "$vul" == "Trivial"  ]; then
+         if [ "$FAIL_ON_VULN_SEVERITY_FLAG" = true ]; then
+                severity=$(curl -s -X GET "${FX_HOST}/api/v1/projects/${PROJECT_ID}/vulnerabilities?&severity=All&page=0&pageSize=20" -H "accept: */*"  "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[] | .severity')
+                cVulCount=0
+                for vul in ${severity}
+                    do
                                                
-                                              triVulCount=`expr $triVulCount + 1` 
-                                           
-                                          fi
+                        if [ "$vul" == "Critical"  ]; then
+                                               
+                              cVulCount=`expr $cVulCount + 1`                                           
+                        fi
+                    done
+                echo "Found $cVulCount Critical Severity Vulnerabilities!!!"
+                echo " "
+
+                hVulCount=0
+                for vul in ${severity}
+                    do
+                                                
+                        if [ "$vul" == "High"  ]; then
+                              hVulCount=`expr $hVulCount + 1`                                           
                                           
-                                    done
-                                echo "Found $triVulCount Trivial Severity Vulnerabilities!!!"
-                                echo " "                                                        
-                                case "$FAIL_ON_VULN_SEVERITY" in 
-                                      "Critical") for vul in ${severity}
-                                                      do
+                        fi
+
+                    done
+                echo "Found $hVulCount High Severity Vulnerabilities!!!"
+                echo " "
+
+                majVulCount=0
+                for vul in ${severity}
+                    do
                                                 
-                                                             if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
-                                                                    echo "Failing script execution since we have found $cVulCount Critical severity vulnerabilities!!!"
-                                                                    exit 1                                           
-                                                             fi                                             
-                                                      done
-                                      ;;
-                                      "High") for vul in ${severity}
-                                                      do
+                        if [ "$vul" == "Major"  ]; then
+                                                
+                              majVulCount=`expr $majVulCount + 1`
+                        fi
+                                          
+                    done
+                echo "Found $majVulCount Major Severity Vulnerabilities!!!"
+                echo " "
+
+                medVulCount=0
+                for vul in ${severity}
+                    do
+                                                
+                        if [ "$vul" == "Medium"  ]; then
+                                                
+                              medVulCount=`expr $medVulCount + 1`
+                        fi
+                                          
+                    done
+                echo "Found $medVulCount Medium Severity Vulnerabilities!!!"
+                echo " "
+
+                minVulCount=0
+                for vul in ${severity}
+                    do
+                                                
+                        if [ "$vul" == "Minor"  ]; then
+                                                
+                              minVulCount=`expr $minVulCount + 1`
+                        fi
+                                          
+                    done
+                echo "Found $minVulCount Minor Severity Vulnerabilities!!!"
+                echo " "
+
+                lowVulCount=0
+                for vul in ${severity}
+                    do
+                                                
+                        if [ "$vul" == "Low"  ]; then
+
+                              lowVulCount=`expr $lowVulCount + 1`  
+                                          
+                        fi
+                                          
+                    done
+                echo "Found $lowVulCount Low Severity Vulnerabilities!!!"
+                echo " "
+
+                triVulCount=0
+                for vul in ${severity}
+                    do
+                                                
+                        if [ "$vul" == "Trivial"  ]; then
+                                               
+                              triVulCount=`expr $triVulCount + 1` 
+                                           
+                        fi
+                                          
+                    done
+                echo "Found $triVulCount Trivial Severity Vulnerabilities!!!"
+                echo " "                                                        
+                case "$FAIL_ON_VULN_SEVERITY" in 
+                      "Critical") for vul in ${severity}
+                                      do
+                         
+                                          if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
+                                                 echo "Failing script execution since we have found $cVulCount Critical severity vulnerabilities!!!"
+                                                 exit 1                                           
+                                          fi                                             
+                                      done
+                      ;;
+                      "High") for vul in ${severity}
+                                  do
                                                      
-                                                             if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
-                                                                    echo "Failing script execution since we have found $cVulCount Critical and $hVulCount High severity vulnerabilities!!!"
-                                                                    exit 1
+                                      if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
+                                             echo "Failing script execution since we have found $cVulCount Critical and $hVulCount High severity vulnerabilities!!!"
+                                             exit 1
                                            
-                                                             fi                                             
-                                                      done
-                                      ;;                     
-                                      "Medium") for vul in ${severity}
-                                                      do
+                                      fi                                             
+                                  done
+                      ;;                     
+                      "Medium") for vul in ${severity}
+                                    do
                                                 
-                                                             if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] || [ "$vul" == "Medium"  ] ; then
-                                                                    echo "Failing script execution since we have found $cVulCount Critical, $hVulCount High and $medVulCount Medium severity vulnerabilities!!!"
-                                                                    exit 1
+                                        if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] || [ "$vul" == "Medium"  ] ; then
+                                               echo "Failing script execution since we have found $cVulCount Critical, $hVulCount High and $medVulCount Medium severity vulnerabilities!!!"
+                                               exit 1
                                            
-                                                             fi                                             
-                                                      done
-                                      ;;
-                                   *)                          
-                                esac
+                                        fi                                             
+                                    done
+                       ;;
+                       *)                          
+                esac
 
-                        fi 
-                        exit 0
+         fi 
+         
+         if [ "$taskStatus" == "TIMEOUT" ];then
+               echo "Task Status = " $taskStatus
+               exit 1
+         fi
+         exit 0
+         #echo "$(curl -s --location --request GET "${FX_HOST}/api/v1/runs/${runId}" --header "Authorization: Bearer "$token"")"
+         #exit 1
 
-                fi
-        done
+else
+      URL="${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&categories=${CAT}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" 
+      url=$( echo "$URL" | sed 's/ /%20/g' )
+      echo "The request is $url"
+      echo " "
+      data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]')  
+      # data=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]')
+      runId=$( jq -r '.id' <<< "$data")
+      projectId=$( jq -r '.job.project.id' <<< "$data")
+      #runId=$(curl -s --location --request POST "$url" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
 
-if [ "$taskStatus" == "TIMEOUT" ];then
-echo "Task Status = " $taskStatus
- exit 1
-fi
+      echo "runId =" $runId
+      #if [ -z "$runId" ]
+      if [ "$runId" == null ]
+      then
+            echo "RunId = " "$runId"
+            echo "Invalid runid"
+            echo $(curl -s --location --request POST "${FX_HOST}/api/v1/runs/project/${FX_PROJECT_NAME}?jobName=${PROFILE_NAME}&region=${REGION}&emailReport=${FX_EMAIL_REPORT}&reportType=${FX_REPORT_TYPE}${FX_SCRIPT}" --header "Authorization: Bearer "$token"" | jq -r '.["data"]|.id')
+            exit 1
+      fi
 
-echo "$(curl -s --location --request GET "${FX_HOST}/api/v1/runs/${runId}" --header "Authorization: Bearer "$token"")"
-exit 1
 
-return 0
+      taskStatus="WAITING"
+      echo "taskStatus = " $taskStatus
+
+      while [ "$taskStatus" == "WAITING" -o "$taskStatus" == "PROCESSING" ]
+               do
+                             sleep 5
+                             echo "Checking Status...."
+
+                             passPercent=$(curl -s --location --request GET "${FX_HOST}/api/v1/runs/${runId}" --header "Authorization: Bearer "$token""| jq -r '.["data"]|.ciCdStatus')
+
+                             IFS=':' read -r -a array <<< "$passPercent"
+
+                             taskStatus="${array[0]}"
+
+                             echo "Status =" "${array[0]}" " Success Percent =" "${array[1]}"  " Total Tests =" "${array[2]}" " Total Failed =" "${array[3]}" " Run =" "${array[6]}"
+                             # VAR2=$(echo "Status =" "${array[0]}" " Success Percent =" "${array[1]}"  " Total Tests =" "${array[2]}" " Total Failed =" "${array[3]}" " Run =" "${array[6]}")      
+
+
+                             if [ "$taskStatus" == "COMPLETED" ];then
+                                    echo "------------------------------------------------"
+                                    #echo  "Run detail link ${FX_HOST}/${array[7]}"
+                                    echo  "Run detail link ${FX_HOST}${array[7]}"
+                                    echo "-----------------------------------------------"
+                                    echo "$PROFILE_NAME Profile Catgories Scan Successfully Completed!!"
+                                    echo " "
+                                    if [ "$FX_EMAIL_REPORT" = true ]; then     
+                                          sleep 10
+                                          echo "Will wait for 10 seconds"                       
+                                          totalEScount=$(curl -s -X GET "${FX_HOST}/api/v1/runs/${runId}/test-suite-responses" -H "accept: */*"  --header "Authorization: Bearer "$token""  | jq -r '.data[]|.id')
+                                          totalPGcount=$(curl -s -X GET "${FX_HOST}/api/v1/runs/${runId}" -H "accept: */*"  --header "Authorization: Bearer "$token""  | jq -r '.data.task.totalTests')
+                                          esCount=0 
+                                          for scan in ${totalEScount}
+                                              do
+                                                   escount=`expr $escount + 1`
+                                              done
+                                          if [ $totalPGcount -eq $escount ]; then
+                                                echo "Email report will be sent in a short while!!"
+                                          else
+                                                echo "Email report will be sent after some delay!!"
+                                          fi
+                                    fi
+			                  if [ "$OUTPUT_FILENAME" != "" ];then
+                                          sarifoutput=$(curl -s --location --request GET "${FX_HOST}/api/v1/projects/${projectId}/sarif" --header "Authorization: Bearer "$token"" | jq  '.data')
+		                              #echo $sarifoutput >> $OUTPUT_FILENAME
+                                          echo $sarifoutput >> $GITHUB_WORKSPACE/$OUTPUT_FILENAME
+               		                  echo "SARIF output file created successfully"
+                                          echo " "
+                                    fi
+                                    if [ "$FAIL_ON_VULN_SEVERITY_FLAG" = true ]; then
+                                          severity=$(curl -s -X GET "${FX_HOST}/api/v1/projects/${projectId}/vulnerabilities?&severity=All&page=0&pageSize=20" -H "accept: */*"  "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data[] | .severity')
+
+                                          cVulCount=0
+                                          for vul in ${severity}
+                                              do
+                                                
+                                                      if [ "$vul" == "Critical"  ]; then
+                                                
+                                                           cVulCount=`expr $cVulCount + 1`                                           
+                                                      fi
+
+                                              done
+                                          echo "Found $cVulCount Critical Severity Vulnerabilities!!!"
+                                          echo " "
+
+                                          hVulCount=0
+                                          for vul in ${severity}
+                                              do
+                                                
+                                                      if [ "$vul" == "High"  ]; then
+                                                            hVulCount=`expr $hVulCount + 1`                                           
+                                           
+                                                      fi
+
+                                              done
+                                          echo "Found $hVulCount High Severity Vulnerabilities!!!"
+                                          echo " "
+
+                                          majVulCount=0
+                                          for vul in ${severity}
+                                              do
+                                                
+                                                      if [ "$vul" == "Major"  ]; then
+                                                
+                                                            majVulCount=`expr $majVulCount + 1`
+                                                      fi
+                                          
+                                              done
+                                          echo "Found $majVulCount Major Severity Vulnerabilities!!!"
+                                          echo " "
+
+                                          medVulCount=0
+                                          for vul in ${severity}
+                                              do
+                                                
+                                                      if [ "$vul" == "Medium"  ]; then
+                                                
+                                                            medVulCount=`expr $medVulCount + 1`
+                                                      fi
+                                          
+                                              done
+                                          echo "Found $medVulCount Medium Severity Vulnerabilities!!!"
+                                          echo " "
+
+                                          minVulCount=0
+                                          for vul in ${severity}
+                                              do
+                                                
+                                                      if [ "$vul" == "Minor"  ]; then
+                                                
+                                                            minVulCount=`expr $minVulCount + 1`
+                                                      fi
+                                          
+                                              done
+                                          echo "Found $minVulCount Minor Severity Vulnerabilities!!!"
+                                          echo " "
+
+                                          lowVulCount=0
+                                          for vul in ${severity}
+                                              do
+                                                
+                                                      if [ "$vul" == "Low"  ]; then
+
+                                                            lowVulCount=`expr $lowVulCount + 1`  
+                                           
+                                                      fi
+                                          
+                                              done
+                                          echo "Found $lowVulCount Low Severity Vulnerabilities!!!"
+                                          echo " "
+
+                                          triVulCount=0
+                                          for vul in ${severity}
+                                              do
+                                                
+                                                      if [ "$vul" == "Trivial"  ]; then
+                                               
+                                                            triVulCount=`expr $triVulCount + 1` 
+                                           
+                                                      fi
+                                          
+                                              done
+                                          echo "Found $triVulCount Trivial Severity Vulnerabilities!!!"
+                                          echo " "                                                        
+                                          case "$FAIL_ON_VULN_SEVERITY" in 
+                                                "Critical") for vul in ${severity}
+                                                                do
+                                                
+                                                                        if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
+                                                                               echo "Failing script execution since we have found $cVulCount Critical severity vulnerabilities!!!"
+                                                                               exit 1                                           
+                                                                        fi                                             
+                                                                done
+                                                ;;
+                                                "High") for vul in ${severity}
+                                                            do
+                                                     
+                                                                        if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] ; then
+                                                                               echo "Failing script execution since we have found $cVulCount Critical and $hVulCount High severity vulnerabilities!!!"
+                                                                               exit 1
+                                           
+                                                                        fi                                             
+                                                            done
+                                                ;;                     
+                                                "Medium") for vul in ${severity}
+                                                              do
+                                                
+                                                                        if  [ "$vul" == "Critical"  ] || [ "$vul" == "High"  ] || [ "$vul" == "Medium"  ] ; then
+                                                                               echo "Failing script execution since we have found $cVulCount Critical, $hVulCount High and $medVulCount Medium severity vulnerabilities!!!"
+                                                                               exit 1
+                                           
+                                                                        fi                                             
+                                                              done
+                                                ;;
+                                            *)                          
+                                          esac
+
+                                    fi 
+                                    exit 0
+
+                             fi
+               done
+
+      if [ "$taskStatus" == "TIMEOUT" ];then
+            echo "Task Status = " $taskStatus
+            exit 1
+      fi
+
+      echo "$(curl -s --location --request GET "${FX_HOST}/api/v1/runs/${runId}" --header "Authorization: Bearer "$token"")"
+      exit 1
+fi 
+#return 0
