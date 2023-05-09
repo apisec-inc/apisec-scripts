@@ -133,19 +133,28 @@ for job in ${joblist}
                                       tsChanges=$(git diff @^1 --name-only | grep ui | cut -d. -f3 | sort -u | grep ts)
                                       htmlChanges=$(git diff @^1 --name-only | grep ui | cut -d. -f3 | sort -u | grep html)
                                       scssChanges=$(git diff @^1 --name-only | grep ui | cut -d. -f3 | sort -u | grep scss)
+
+                                      tsChanges1=$(git diff @^1 --name-only | grep ui | cut -d. -f2 | sort -u | grep ts)
+                                      htmlChanges1=$(git diff @^1 --name-only | grep ui | cut -d. -f2 | sort -u | grep html)
+                                      scssChanges1=$(git diff @^1 --name-only | grep ui | cut -d. -f2 | sort -u | grep scss)
+
                                       echo "$tsChanges"
                                       echo "$htmlChanges"
                                       echo "$scssChanges"
 
+                                      echo "$tsChanges1"
+                                      echo "$htmlChanges1"
+                                      echo "$scssChanges1"
 
-                                     if [[ $tsChanges == *"ts"* ]] || [[ $htmlChanges == *"html"* ]] || [[ $scssChanges == *"scss"* ]]; then
+
+
+                                     if [[ $tsChanges == *"ts"* ]] || [[ $htmlChanges == *"html"* ]] || [[ $scssChanges == *"scss"* ]] || [[ $tsChanges1 == *"ts"* ]] || [[ $htmlChanges1 == *"html"* ]] || [[ $scssChanges1 == *"scss"* ]] ; then
                                             echo "Building NG-Build job"
                                             curl -s -X POST -u $FX_USER:$FX_PWD $FX_HOST/job/Ng-Build/build
                                             echo " "
                                             cpJobCount=`expr $cpJobCount + 1`
                                             tJobCount=`expr $tJobCount + 1`                                                            
                                             #break; 
-                                     
 
                                      else       
                                             echo "Building Control-Plane job"
@@ -182,12 +191,23 @@ for job in ${joblist}
                                       tsChanges=$(git diff @^1 --name-only | grep ui | cut -d. -f3 | sort -u | grep ts)
                                       htmlChanges=$(git diff @^1 --name-only | grep ui | cut -d. -f3 | sort -u | grep html)
                                       scssChanges=$(git diff @^1 --name-only | grep ui | cut -d. -f3 | sort -u | grep scss)
+
+                                      tsChanges1=$(git diff @^1 --name-only | grep ui | cut -d. -f2 | sort -u | grep ts)
+                                      htmlChanges1=$(git diff @^1 --name-only | grep ui | cut -d. -f2 | sort -u | grep html)
+                                      scssChanges1=$(git diff @^1 --name-only | grep ui | cut -d. -f2 | sort -u | grep scss)
+                                      
+
                                       echo "$tsChanges"
                                       echo "$htmlChanges"
                                       echo "$scssChanges"
 
+                                      echo "$tsChanges1"
+                                      echo "$htmlChanges1"
+                                      echo "$scssChanges1"
 
-                                     if [[ $tsChanges == *"ts"* ]] || [[ $htmlChanges == *"html"* ]] || [[ $scssChanges == *"scss"* ]]; then
+
+
+                                     if [[ $tsChanges == *"ts"* ]] || [[ $htmlChanges == *"html"* ]] || [[ $scssChanges == *"scss"* ]] || [[ $tsChanges1 == *"ts"* ]] || [[ $htmlChanges1 == *"html"* ]] || [[ $scssChanges1 == *"scss"* ]]; then
                                             echo "Building NG-Build job"
                                             curl -s -X POST -u $FX_USER:$FX_PWD $FX_HOST/job/Ng-Build/build
                                             echo " "
@@ -272,4 +292,3 @@ for job in ${joblist}
     echo "Total no. of jobs triggered/build are: $tJobCount"
 
     exit 0
-
