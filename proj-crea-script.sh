@@ -43,10 +43,23 @@ do
   RANDOM=$$
   FX_PROJECTNAME="${FX_PROJECT_NAME}${RANDOM}${count}"
   echo "ProjectName: $FX_PROJECTNAME Iteration No: $count"
-  curl  -k -s -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "https://${FX_HOSTNAME}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECTNAME}'","openAPISpec":"'${FX_OpenAPISpecUrl}'","planType":"ENTERPRISE","isFileLoad": false,"personalizedCoverage":{"auths":[]}}'
+  #curl  -k -s -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "https://${FX_HOSTNAME}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECTNAME}'","openAPISpec":"'${FX_OpenAPISpecUrl}'","planType":"ENTERPRISE","isFileLoad": false,"personalizedCoverage":{"auths":[]}}'
+  data=$(curl -s  -H "Accept: application/json" -H "Content-Type: application/json" --location --request POST "${FX_HOST}/api/v1/projects" --header "Authorization: Bearer "$token"" -d  '{"name":"'${FX_PROJECT_NAME}'","openAPISpec":"'${FX_OpenAPISpecUrl}'","planType":"ENTERPRISE","isFileLoad": false,"personalizedCoverage":{"auths":[]}}' | jq -r '.data')
   echo " "
+  echo ' '
+  project_name=$(jq -r '.name' <<< "$data")
+  project_id=$(jq -r '.id' <<< "$data")
+
+  if [ -z "$project_id" ] || [  "$project_id" == null ]; then
+        echo "Project Id is $project_id/empty" > /dev/null
+  else
+      
+        echo "Successfully created the project."
+        echo "ProjectName: $project_name"
+        echo "ProjectId: $project_id"
+  fi
   echo " "
-  echo "Will wait for 30 mintue before making another post request for new project registration."
+  echo "Will wait for 30 seconds before making another post request for new project registration."
   echo " "
   
   sleep 30
