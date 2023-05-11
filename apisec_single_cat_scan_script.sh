@@ -32,7 +32,8 @@ TEMP=$(getopt -n "$0" -a -l "username:,password:,scanner:,profile:,hostname:,toP
     done
 
 token=$(curl -s -k -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' https://${FX_HOSTNAME}/login | jq -r .token)
-#echo "generated token is:" $token
+echo "generated token is:" $token
+echo " "
 tscancount=0
 scancount=0
 string1=$(date -u | awk '{print $4}')
