@@ -56,10 +56,10 @@ do
         echo "ProjectName: $project_name"
         echo "ProjectId: $project_id"
         echo " "
-        echo "Will wait for 30 seconds before making another post request for new project registration."
+        echo "Will wait for 10 seconds before making another post request for new project registration."
         echo " "
         count=`expr $count + 1`
-        sleep 30        
+        sleep 10        
   fi
 done
 if [ $count -gt 0 ]; then
