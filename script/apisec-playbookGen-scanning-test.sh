@@ -543,6 +543,7 @@ else
                                                 echo "Email report will be sent after some delay!!"
                                           fi
                                     fi
+                                    exit 0
 
 
 
