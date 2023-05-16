@@ -550,7 +550,7 @@ else
                              fi
                             retryCount=`expr $retryCount + 1`  
                             #sleep 2
-                            if [ $retryCount -ge 60  ]; then
+                            if [ $retryCount -ge 120  ]; then
                                   echo " "
                                   retryCount=`expr $retryCount \* 5`
                                   minutes=`expr $retryCount \/ 60`  
