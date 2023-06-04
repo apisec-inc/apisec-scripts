@@ -153,6 +153,7 @@ if [ "$AUTOPILOT_SCAN_FLAG" = true ]; then
             echo " "
             totalRunIds=$(echo "$dtoData" | jq -r '.totalElements')
             if [ $totalRunIds -eq 0 ]; then
+                  echo "Total auto-pilots scans triggered are: $totalRunIds"
                   echo "Autopilot Scans didn't got triggered on $FX_PROJECT_NAME, so breaking script execution!!"
                   exit 1
             else
@@ -169,7 +170,9 @@ if [ "$AUTOPILOT_SCAN_FLAG" = true ]; then
                          environmentId=$(echo $runId | jq -r .job.environment.id)                         
                          runNumber=$(echo $runId | jq -r .runId)
                          runId1=$(echo $runId | jq -r .id)
-                         scanStatus=$(echo $runId | jq -r .task.status)                         
+                         scanStatus=$(echo $runId | jq -r .task.status)
+                         time_millis=$(echo $runId | jq -r .task.totalTime)
+                         totalTime=`echo "scale=2;${time_millis}/1000" | bc`                        
                          echo "Project-Name: $projectName"
                          echo "Project-ID: $projectId"
                          echo "Scanner-Name: $scannerName"
@@ -180,6 +183,7 @@ if [ "$AUTOPILOT_SCAN_FLAG" = true ]; then
                          echo "Scan-No: $runNumber"
                          echo "Scan-RunId: $runId1"
                          echo "Scan-Status: $scanStatus"
+                         echo "Scan-Total-Time: $totalTime seconds"
                          echo " "
                     done                
             fi     
