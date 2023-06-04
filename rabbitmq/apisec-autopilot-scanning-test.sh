@@ -154,7 +154,7 @@ if [ "$AUTOPILOT_SCAN_FLAG" = true ]; then
             totalRunIds=$(echo "$dtoData" | jq -r '.totalElements')
             if [ $totalRunIds -eq 0 ]; then
                   echo "Total auto-pilots scans triggered are: $totalRunIds"
-                  echo "Autopilot Scans didn't got triggered on $FX_PROJECT_NAME, so breaking script execution!!"
+                  echo "Autopilot Scans didn't got triggered on $FX_PROJECT_NAME project, so breaking script execution!!"
                   exit 1
             else
                  echo "Total auto-pilots scans triggered are: $totalRunIds"
