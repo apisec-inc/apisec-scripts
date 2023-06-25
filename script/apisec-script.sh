@@ -213,6 +213,7 @@ if [ "$OAS" = true ]; then
                                  do
                                       if [ $pCount -eq 0 ]; then
                                            echo "Checking playbooks generate task Status...."
+                                           sleep 10
                                       fi
                                       pCount=`expr $pCount + 1`  
                                       retryCount=`expr $retryCount + 1`  
@@ -325,6 +326,7 @@ if [ "$OASFile" = true ]; then
                             do
                                 if [ $pCount -eq 0 ]; then
                                       echo "Checking playbooks generate task Status...."
+                                      sleep 10
                                 fi
                                 pCount=`expr $pCount + 1`  
                                 retryCount=`expr $retryCount + 1`  
@@ -447,6 +449,7 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
                             do
                                   if [ $pCount -eq 0 ]; then
                                         echo "Checking playbooks generate task Status...."
+                                        sleep 10
                                   fi
                                   pCount=`expr $pCount + 1`  
                                   retryCount=`expr $retryCount + 1`  
@@ -490,6 +493,7 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
                     do
                         if [ $pCount -eq 0 ]; then
                              echo "Checking playbooks regenerate task Status...."
+                             sleep 10
                         fi
                         pCount=`expr $pCount + 1`  
                         retryCount=`expr $retryCount + 1`  
