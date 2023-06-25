@@ -1235,9 +1235,9 @@ else
                                           esCount=0 
                                           for scan in ${totalEScount}
                                               do
-                                                   escount=`expr $escount + 1`
+                                                   esCount=`expr $esCount + 1`
                                               done
-                                          if [ $totalPGcount -eq $escount ]; then
+                                          if [ $totalPGcount -eq $esCount ]; then
                                                 echo "Email report will be sent in a short while!!"
                                           else
                                                 echo "Email report will be sent after some delay!!"
