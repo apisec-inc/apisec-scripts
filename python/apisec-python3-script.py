@@ -191,7 +191,7 @@ if OPEN_API_SPEC_URL_FLAG == True:
     errors=response.json()['errors']
     if errors == True:
          message=response.json()['messages'][0]['value']      
-         print(message)
+         #print(message)
          print(f"Registering Project  '{FX_PROJECT_NAME}'  via OpenAPISpecUrl method!!")
          payload = json.dumps({
              "name": f"{FX_PROJECT_NAME}",
