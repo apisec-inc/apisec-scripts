@@ -915,7 +915,7 @@ elif scanErrors == False:
                 print("------------------------------------------------")
                 print(f"Run detail link {FX_HOST}{array[7]}")
                 print("------------------------------------------------")
-                print("Scan Successfully Completed!!")
+                print(f" '{PROFILE_NAME}'' Profile Catgories Scan Successfully Completed!!")
                 print("")
                 
                 if FX_EMAIL_REPORT == "true" or FX_EMAIL_REPORT == "True":
