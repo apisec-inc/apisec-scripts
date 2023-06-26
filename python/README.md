@@ -4,8 +4,8 @@
    1. requests: python3 -m pip install requests
    2. pyyaml: python3 -m pip install pyyaml
    3. json: python3 -m pip install json
- 
-   
+
+
 
 
 ##       Use-Case 1: To Register/Update a Project via OpenAPISpecURL.
@@ -21,7 +21,6 @@
        Script flow of execution: Script will regsiter a project if no project with that name exists and will finish there, no scanning will be trigger as auto-pilot jobs will trigger scans automatically.
                                  If a project exists with that name then it will update the project and trigger a scan.
                               
-       Note!!! Script requires yq tool to be installed for working with yaml files and jq tool for working with json files.
        
        Syntax:        python3 apisec-python3-script.py --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --openAPISpecFile   "<path-to-the-openApiSpec-json/yaml-file>"
        
@@ -33,8 +32,7 @@
        Script flow of execution: Script will regsiter a project if no project with that name exists and will finish there, no scanning will be trigger as auto-pilot jobs will trigger scans automatically.
                                  If a project exists with that name then it will update the project and trigger a scan.
                                  Here script will  save OpenAPISpecs in a file and later use file upload method to register/update a project.
-       
-       Note!!! Script requires yq tool to be installed for working with yaml files and jq tool for working with json files.                              
+                                     
                               
        
        Syntax:        python3 apisec-python3-script.py --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --internal_OpenAPISpecUrl <OpenAPISpecURL>                               --specType <json if specUrl have json-content OR yaml if specUrl have  yaml-content>
