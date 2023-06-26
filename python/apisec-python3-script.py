@@ -34,6 +34,7 @@ parser.add_argument("--app_username", help="application user's name")
 parser.add_argument("--app_password", help="application user's password")
 parser.add_argument("--app_endPointUrl", help="application token endpoint")
 parser.add_argument("--app_token_param", help="application token param")
+parser.add_argument("--header_1", help="Complete header_1 Curl request")
 
 parser.add_argument("--baseUrl", help="BaseUrl of App")
 parser.add_argument("--category", help="Category's Name to run a scan")
@@ -67,11 +68,16 @@ APP_USER=args.app_username
 APP_PWD=args.app_password
 ENDPOINT_URL=args.app_endPointUrl
 TOKEN_PARAM=args.app_token_param
+COMPLETE_HEADER1=args.header_1
 BASE_URL=args.baseUrl
 CAT=args.category
 TIER=args.tier
 FX_TAGS=args.tags
 FX_SCRIPT=""
+
+
+if FX_HOST == "" or FX_HOST == None:
+    FX_HOST="https://cloud.apisec.ai"
 
 
 if FX_PROJECT_NAME != None or FX_PROJECT_NAME == "":
@@ -80,37 +86,16 @@ if FX_PROJECT_NAME != None or FX_PROJECT_NAME == "":
     FX_PROJECT_NAME=a
     PROJECT_NAME=FX_PROJECT_NAME.replace(' ', '%20')
 
-payload = json.dumps({
-  "username": f"{FX_USER}",
-  "password": f"{FX_PASS}"
-})
-headers = {
-  'Content-Type': 'application/json'
-}
+if PROFILE_NAME == "" or PROFILE_NAME == None:
+    PROFILE_NAME="Master"
 
-response = requests.request("POST", f'{FX_HOST}/login', headers=headers, data=payload)
-token = response.json()['token']
-print("")
-print(token)
-tokenheaders = {
-  'Content-Type': 'application/json',
-  'accept': '*/*',
-  'Authorization': f'Bearer {token}'
-}
-
-if FX_HOST == "" or FX_HOST == None:
-    FX_HOST="https://cloud.apisec.ai"
-
-if REGION == "" or REGION == None:
-    REGION="Super_3"
 if FX_EMAIL_REPORT == "" or FX_EMAIL_REPORT == None:
     FX_EMAIL_REPORT="false"
 
 if FX_REPORT_TYPE == "" or FX_REPORT_TYPE == None:
     FX_REPORT_TYPE=""    
 
-if PROFILE_NAME == "" or PROFILE_NAME == None:
-    PROFILE_NAME="Master"
+
 
 if FAIL_ON_VULN_SEVERITY == "Critical"  or FAIL_ON_VULN_SEVERITY == "High"  or FAIL_ON_VULN_SEVERITY == "Medium":
     FAIL_ON_VULN_SEVERITY_FLAG=True
@@ -146,6 +131,12 @@ else:
     SCANNER_NAME=f'{PROFILE_SCANNER}'
     PROFILE_NAME=f"{PROFILE_NAME}"
 
+if REGION == "" or REGION == None:
+    SCANNER_NAME_FLAG=False
+    REGION=""
+else: 
+    SCANNER_NAME_FLAG=True
+
 if AUTH_NAME == "" or AUTH_NAME == None:
      AUTH_NAME_FLAG=False     
 else:
@@ -161,6 +152,39 @@ else:
 
 if CAT == "" or CAT == None:
     CAT=""
+
+# For Project Name exist check
+if   FX_PROJECT_NAME == ""  or FX_PROJECT_NAME == None:
+        PROJECT_NAME_FLAG=False
+else: 
+        PROJECT_NAME_FLAG=True
+
+
+payload = json.dumps({
+  "username": f"{FX_USER}",
+  "password": f"{FX_PASS}"
+})
+headers = {
+  'Content-Type': 'application/json'
+}
+
+response = requests.request("POST", f'{FX_HOST}/login', headers=headers, data=payload)
+if "token" in response.json():
+    token = response.json()['token']
+    print("")
+    print(token)
+    print("")
+elif "message" in response.json():
+      message = response.json()['message']
+      print(" ")
+      print(message+". Please provide correct User Credentials!!")
+      exit(1)
+
+tokenheaders = {
+  'Content-Type': 'application/json',
+  'accept': '*/*',
+  'Authorization': f'Bearer {token}'
+}
 
 if OPEN_API_SPEC_URL_FLAG == True:
     response = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
@@ -185,7 +209,7 @@ if OPEN_API_SPEC_URL_FLAG == True:
              pMessage=resp.json()['messages'][0]['value']
              print(pMessage)
              exit(1)
-             print("Hello testing")
+
          elif perrors == False:
              projectId = resp.json()['data']['id']
              projectName = resp.json()['data']['name']
@@ -196,6 +220,7 @@ if OPEN_API_SPEC_URL_FLAG == True:
              while playbookTaskStatus == "In_progress":
                  if pCount == 0:
                      print ("Checking playbooks generate task Status....")
+                     time.sleep(10)
 
                  pCount += 1                
                  retryCount += 1
@@ -218,7 +243,7 @@ if OPEN_API_SPEC_URL_FLAG == True:
                      exit(1)
 
     elif errors == False:
-        print (f"Updating Project  {FX_PROJECT_NAME} via OpenAPISpecUrl method!!")
+        print (f"Updating Project  '{FX_PROJECT_NAME}' via OpenAPISpecUrl method!!")
         projectName = response.json()['data']['name']
         projectId = response.json()['data']['id']
         orgId=response.json()['data']['org']['id']  
@@ -285,7 +310,7 @@ if OPEN_API_SPEC_FILE_FLAG == True:
     errors=response.json()['errors']
     if errors == True:
          message=response.json()['messages'][0]['value']      
-         print(message)
+         #print(message)
          print(f"Registering Project  '{FX_PROJECT_NAME}'  via OpenAPISpecFile method!!")
 
          payload = json.dumps({
@@ -316,6 +341,7 @@ if OPEN_API_SPEC_FILE_FLAG == True:
              while playbookTaskStatus == "In_progress":
                  if pCount == 0:
                      print ("Checking playbooks generate task Status....")
+                     time.sleep(10)
 
                  pCount += 1                 
                  retryCount += 1
@@ -338,7 +364,7 @@ if OPEN_API_SPEC_FILE_FLAG == True:
                      exit(1)    
 
     elif errors == False:
-        print (f"Updating Project  {FX_PROJECT_NAME} via OpenAPISpecFile method!!")
+        print (f"Updating Project  '{FX_PROJECT_NAME}' via OpenAPISpecFile method!!")
         projectName = response.json()['data']['name']
         projectId = response.json()['data']['id']
         orgId=response.json()['data']['org']['id']  
@@ -427,7 +453,7 @@ if INTERNAL_OPEN_API_SPEC_FLAG == True:
     errors=response.json()['errors']
     if errors == True:
          message=response.json()['messages'][0]['value']      
-         print(message)
+         #print(message)
          print(f"Registering Project  '{FX_PROJECT_NAME}'  via OpenAPISpecFile method!!")
 
          payload = json.dumps({
@@ -458,6 +484,7 @@ if INTERNAL_OPEN_API_SPEC_FLAG == True:
              while playbookTaskStatus == "In_progress":
                  if pCount == 0:
                      print ("Checking playbooks generate task Status....")
+                     time.sleep(10)
 
                  pCount += 1                 
                  retryCount += 1
@@ -480,7 +507,7 @@ if INTERNAL_OPEN_API_SPEC_FLAG == True:
                      exit(1)    
 
     elif errors == False:
-        print (f"Updating Project  {FX_PROJECT_NAME} via OpenAPISpecFile method!!")
+        print (f"Updating Project  '{FX_PROJECT_NAME}' via OpenAPISpecFile method!!")
         projectName = response.json()['data']['name']
         projectId = response.json()['data']['id']
         orgId=response.json()['data']['org']['id']  
@@ -530,16 +557,72 @@ if INTERNAL_OPEN_API_SPEC_FLAG == True:
                      print(f"Playbooks Generation Task Status: {playbookTaskStatus} even after {retryCount} seconds, so halting/breaking script execution!!!")
                      exit(1)
 
-if REFRESH_PLAYBOOKS == True:
-    refreshResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
-    errors=refreshResp.json()['errors']
-    if errors == True:
-        message=response.json()['messages'][0]['value']      
+if PROJECT_NAME_FLAG == True:
+    projResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
+    projErrors=projResp.json()['errors']
+    if projErrors == True:
+       message=projResp.json()['messages'][0]['value']
+       a=message
+       a = a.replace('[', '"'); a = a.replace(']', '"')
+       message=a
+       print(message)
+       exit(1)
+    elif projErrors == False:
+        dto=projResp.json()['data']
+        projectId=dto['id']
+        getProjectName=dto['name']
+
+        
+if SCANNER_NAME_FLAG == True:
+    scanCount=0
+    scanDataResp = requests.request("GET", f"{FX_HOST}/api/v1/bot-clusters?page=0&pageSize=20&sort=createdDate&sortType=DESC", headers=tokenheaders)
+    scanErrorFlag = scanDataResp.json()['errors']
+    if scanErrorFlag == True:
+        message=scanDataResp.json()['messages'][0]['value']
         print(message)
-    elif errors == False:
-        projectId = refreshResp.json()['data']['id']
-        projectName = refreshResp.json()['data']['name']
-        dto = refreshResp.json()['data']
+        exit(1)
+    elif scanErrorFlag == False:                
+        scanData=scanDataResp.json()['data']
+        test=json.dumps(scanData)
+        json_object = json.loads(test)
+        for element in json_object:
+            scanner_name=element['name']
+            if REGION == scanner_name:
+                scanCount+= 1
+
+
+    superScanDataResp = requests.request("GET", f"{FX_HOST}/api/v1/bot-clusters/superbotnetwork?page=0&pageSize=20&sort=createdDate&sortType=DESC", headers=tokenheaders)
+    superScanErrorFlag = superScanDataResp.json()['errors']
+    if superScanErrorFlag == True:
+        message=superScanDataResp.json()['messages'][0]['value']
+        print(message)
+        exit(1)
+    elif superScanErrorFlag == False:                
+        superScanData=superScanDataResp.json()['data']
+        test=json.dumps(superScanData)
+        json_object = json.loads(test)
+        for element in json_object:
+            scanner_name=element['name']
+            if REGION == scanner_name:
+                scanCount+= 1
+
+    if scanCount <= 0:       
+       print( REGION + " scanner doesn't exists!!")
+       exit(1)
+
+
+
+
+if REFRESH_PLAYBOOKS == True:
+    #refreshResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
+    #errors=refreshResp.json()['errors']
+    #if errors == True:
+    #    message=response.json()['messages'][0]['value']      
+    #    print(message)
+    #elif errors == False:
+    #    projectId = refreshResp.json()['data']['id']
+    #    projectName = refreshResp.json()['data']['name']
+    #    dto = refreshResp.json()['data']
         payload = f"{dto}"
         refreshPlaybooksResp = requests.request("PUT", f"{FX_HOST}/api/v1/projects/{projectId}/refresh-specs", headers=tokenheaders, data=payload)
         playbookTaskStatus="In_progress"
@@ -559,7 +642,7 @@ if REFRESH_PLAYBOOKS == True:
             if playbookTaskStatus == "Done":
                 print(" ")
                 print(f"Playbooks refresh task is succesfully completed!!!")
-                print(f"ProjectName: '{projectName}'")
+                print(f"ProjectName: '{FX_PROJECT_NAME}'")
                 print(f"ProjectId: {projectId}")
 
             if retryCount > 55:
@@ -569,24 +652,63 @@ if REFRESH_PLAYBOOKS == True:
                 exit(1)
 
 if PROFILE_SCANNER_FLAG == True:
-    refreshResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
-    errors=refreshResp.json()['errors']
-    if errors == True:
-        message=response.json()['messages'][0]['value']      
+    scanCount=0
+    scanDataResp = requests.request("GET", f"{FX_HOST}/api/v1/bot-clusters?page=0&pageSize=20&sort=createdDate&sortType=DESC", headers=tokenheaders)
+    scanErrorFlag = scanDataResp.json()['errors']
+    if scanErrorFlag == True:
+        message=scanDataResp.json()['messages'][0]['value']
         print(message)
-    elif errors == False:
-        projectId = refreshResp.json()['data']['id']
-        projectName = refreshResp.json()['data']['name']
-        dto = refreshResp.json()['data']
-        dataResp = requests.request("GET", f"{FX_HOST}/api/v1/jobs/project-id/{projectId}?page=0&pageSize=20&sort=modifiedDate%2CcreatedDate&sortType=DESC", headers=tokenheaders)
-        test=dataResp.json()['data']
-        test=json.dumps(test)
+        exit(1)
+    elif scanErrorFlag == False:                
+        scanData=scanDataResp.json()['data']
+        test=json.dumps(scanData)
         json_object = json.loads(test)
         for element in json_object:
+            scanner_name=element['name']
+            if SCANNER_NAME == scanner_name:
+                scanCount+= 1
+
+
+    superScanDataResp = requests.request("GET", f"{FX_HOST}/api/v1/bot-clusters/superbotnetwork?page=0&pageSize=20&sort=createdDate&sortType=DESC", headers=tokenheaders)
+    superScanErrorFlag = superScanDataResp.json()['errors']
+    if superScanErrorFlag == True:
+        message=superScanDataResp.json()['messages'][0]['value']
+        print(message)
+        exit(1)
+    elif superScanErrorFlag == False:                
+        superScanData=superScanDataResp.json()['data']
+        test=json.dumps(superScanData)
+        json_object = json.loads(test)
+        for element in json_object:
+            scanner_name=element['name']
+            if SCANNER_NAME == scanner_name:
+                scanCount+= 1
+
+    if scanCount <= 0:       
+       print( SCANNER_NAME + " scanner doesn't exists!!")
+       exit(1)
+
+
+    #refreshResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
+    #errors=refreshResp.json()['errors']
+    #if errors == True:
+    #    message=response.json()['messages'][0]['value']      
+    #    print(message)
+    #elif errors == False:
+    #    projectId = refreshResp.json()['data']['id']
+    #    projectName = refreshResp.json()['data']['name']
+    #    dto = refreshResp.json()['data']
+    profCount=0
+    dataResp = requests.request("GET", f"{FX_HOST}/api/v1/jobs/project-id/{projectId}?page=0&pageSize=20&sort=modifiedDate%2CcreatedDate&sortType=DESC", headers=tokenheaders)
+    test=dataResp.json()['data']
+    test=json.dumps(test)
+    json_object = json.loads(test)
+    for element in json_object:
             profName=element['name']
             profId=element['id']
-            if PROFILE_NAME == profName:                
-                print(f"Updating $PROFILE_NAME profile with {SCANNER_NAME} scanner in {FX_PROJECT_NAME} project!!")
+            if PROFILE_NAME == profName:
+                profCount+= 1                
+                print(f"Updating '{PROFILE_NAME}' profile with '{SCANNER_NAME}' scanner in '{FX_PROJECT_NAME}' project!!")
                 element["regions"] = SCANNER_NAME
                 udto=json.dumps(element)
                 payload = f"{udto}"
@@ -599,17 +721,22 @@ if PROFILE_SCANNER_FLAG == True:
                 print(f"ProfileId: {profId}")
                 print(f"UpdatedScannerName: {updatedScanner}")
                 print(" ")                          
+    if profCount <= 0:
+        print( f"'{PROFILE_NAME}' profile doesn't exists in '{FX_PROJECT_NAME}' project!!")
+        exit(1)
 
 if AUTH_NAME_FLAG == True:
-    authResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
-    errors=authResp.json()['errors']
-    if errors == True:
-        message=authResp.json()['messages'][0]['value']      
-        print(message)
-    elif errors == False:
-        projectId = authResp.json()['data']['id']
-        projectName = authResp.json()['data']['name']
-        dto = authResp.json()['data']
+    #authResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
+    #errors=authResp.json()['errors']
+    #if errors == True:
+    #    message=authResp.json()['messages'][0]['value']      
+    #    print(message)
+    #elif errors == False:
+    #    projectId = authResp.json()['data']['id']
+    #    projectName = authResp.json()['data']['name']
+    #    dto = authResp.json()['data']
+        EnvCount=0
+        AuthCount=0
         dataResp = requests.request("GET", f"{FX_HOST}/api/v1/envs/projects/{projectId}?page=0&pageSize=25", headers=tokenheaders)
         test=dataResp.json()['data']
         test=json.dumps(test)
@@ -618,6 +745,7 @@ if AUTH_NAME_FLAG == True:
             envName=element['name']
             envId=element['id']
             if ENV_NAME == envName:
+                EnvCount+= 1                
                 updatedAuths = element['auths']
                 updatedAuths1 = element['auths']                
                 for auth in updatedAuths:
@@ -625,6 +753,7 @@ if AUTH_NAME_FLAG == True:
                     authType=auth['authType']
                     if authType == "Basic":
                         if AUTH_NAME == authName:
+                            AuthCount+= 1
                             print (f"Updating '{AUTH_NAME}' Auth with Basic as AuthType of '{ENV_NAME}' environment in '{FX_PROJECT_NAME}' project!!")
                             print(" ")
                             auth['username'] = APP_USER
@@ -649,6 +778,7 @@ if AUTH_NAME_FLAG == True:
 
                     elif authType == "Digest":
                         if AUTH_NAME == authName:
+                            AuthCount+= 1
                             print (f"Updating '{AUTH_NAME}' Auth with Digest as AuthType of '{ENV_NAME}' environment in '{FX_PROJECT_NAME}' project!!")
                             print(" ")
                             auth['username'] = APP_USER
@@ -673,9 +803,11 @@ if AUTH_NAME_FLAG == True:
 
                     elif authType == "Token":
                         if AUTH_NAME == authName:
+                            AuthCount+= 1
                             print (f"Updating '{AUTH_NAME}' Auth with Token as AuthType of '{ENV_NAME}' environment in '{FX_PROJECT_NAME}' project!!")                          
-                            mAuth=f"Authorization: Bearer {{{{@CmdCache | curl -s -d '{{\"username\":\"{APP_USER}\",\"password\":\"{APP_PWD}\"}}' -H \"Content-Type: application/json\" -H \"Accept: application/json\" -X POST \"{ENDPOINT_URL}\" | jq --raw-output \"{TOKEN_PARAM}\" }}}}"
-                            auth['header_1'] = mAuth                            
+                            #mAuth=f"Authorization: Bearer {{{{@CmdCache | curl -s -d '{{\"username\":\"{APP_USER}\",\"password\":\"{APP_PWD}\"}}' -H \"Content-Type: application/json\" -H \"Accept: application/json\" -X POST \"{ENDPOINT_URL}\" | jq --raw-output \"{TOKEN_PARAM}\" }}}}"
+                            #auth['header_1'] = mAuth                            
+                            auth['header_1'] = COMPLETE_HEADER1
                             modifiedAuths = [auth if d['name'] == f'{AUTH_NAME}' else d for d in updatedAuths1]
                             element['auths'] = modifiedAuths
                             udto = json.dumps(element)
@@ -693,17 +825,26 @@ if AUTH_NAME_FLAG == True:
                                     print(f"EnvironmentId: {envId}")
                                     print(f"UpdatedAuth: {updatedAuthObj}")
                                     print(" ")
+        if EnvCount <= 0:       
+            print( f"'{ENV_NAME}'  environment doesn't exists in '{FX_PROJECT_NAME}' project!!")
+            exit(1)
+
+        if AuthCount <= 0:       
+            print( f"'{AUTH_NAME}'  auth doesn't exists in '{ENV_NAME}'  environment for '{FX_PROJECT_NAME}'  project!!")
+            exit(1)
+
                             
 if BASE_URL_FLAG == True:
-    baseResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
-    errors=baseResp.json()['errors']
-    if errors == True:
-        message=baseResp.json()['messages'][0]['value']      
-        print(message)
-    elif errors == False:
-        projectId = baseResp.json()['data']['id']
-        projectName = baseResp.json()['data']['name']
-        dto = baseResp.json()['data']
+    #baseResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
+    #errors=baseResp.json()['errors']
+    #if errors == True:
+    #    message=baseResp.json()['messages'][0]['value']      
+    #    print(message)
+    #elif errors == False:
+    #    projectId = baseResp.json()['data']['id']
+    #   projectName = baseResp.json()['data']['name']
+    #    dto = baseResp.json()['data']
+        EnvCount=0
         dataResp = requests.request("GET", f"{FX_HOST}/api/v1/envs/projects/{projectId}?page=0&pageSize=25", headers=tokenheaders)
         test=dataResp.json()['data']
         test=json.dumps(test)
@@ -711,7 +852,8 @@ if BASE_URL_FLAG == True:
         for element in json_object:
             envName=element['name']
             envId=element['id']
-            if ENV_NAME == envName:                
+            if ENV_NAME == envName:
+                EnvCount+= 1
                 print(f"Updating '{ENV_NAME}' environment with '{BASE_URL}' as baseUrl in '{FX_PROJECT_NAME}' project!!")
                 element["baseUrl"] = BASE_URL
                 udto=json.dumps(element)
@@ -726,24 +868,32 @@ if BASE_URL_FLAG == True:
                 print(f"UpdatedBaseUrl: {UpdatedBaseUrl}")
                 print(" ")
 
+        if EnvCount <= 0:       
+            print( f"'{ENV_NAME}' environment doesn't exists in '{FX_PROJECT_NAME}' project!!")
+            exit(1)
 
+#exit(0)
 
-projResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
-projErrors=projResp.json()['errors']
-if projErrors == True:
-    message=projResp.json()['messages'][0]['value']
-    print(message + " so scanning cannot be triggered!!")
-elif projErrors == False:
-    URL=f"{FX_HOST}/api/v1/runs/project/{PROJECT_NAME}?jobName={PROFILE_NAME}&region={REGION}&categories={CAT}&emailReport={FX_EMAIL_REPORT}&reportType={FX_REPORT_TYPE}{FX_SCRIPT}"
-    print(" ")
-    print(f"The request is {URL}")
-    scanResp = requests.request("POST", f"{URL}", headers=tokenheaders)
-    scanErrors=scanResp.json()['errors']
-    if scanErrors == True:
-        message=projnResp.json()['messages'][0]['value']
+# projResp = requests.request("GET", f"{FX_HOST}/api/v1/projects/find-by-name/{FX_PROJECT_NAME}", headers=tokenheaders)
+# projErrors=projResp.json()['errors']
+# if projErrors == True:
+#     message=projResp.json()['messages'][0]['value']
+#     a=message
+#     a = a.replace('[', '"'); a = a.replace(']', '"')
+#     message=a
+#     print(message)
+#     exit(1)
+# elif projErrors == False:
+URL=f"{FX_HOST}/api/v1/runs/project/{PROJECT_NAME}?jobName={PROFILE_NAME}&region={REGION}&categories={CAT}&emailReport={FX_EMAIL_REPORT}&reportType={FX_REPORT_TYPE}{FX_SCRIPT}"
+print(" ")
+print(f"The request is {URL}")
+scanResp = requests.request("POST", f"{URL}", headers=tokenheaders)
+scanErrors=scanResp.json()['errors']
+if scanErrors == True:
+        message=projResp.json()['messages'][0]['value']
         print(message + " so scanning cannot be triggered!!")
     
-    elif scanErrors == False:
+elif scanErrors == False:
         scanData=scanResp.json()['data']
         projectId=scanData['job']['project']['id']
         runId=scanData['id']
