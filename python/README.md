@@ -3,7 +3,6 @@
 # Note!! Please make sure following python packages are install
    1. requests: python3 -m pip install requests
    2. pyyaml: python3 -m pip install pyyaml
-   3. json: python3 -m pip install json
 
 
 
