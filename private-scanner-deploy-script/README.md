@@ -1,4 +1,4 @@
-# How to Run the ```apisec-private-scanner-docker.sh``` in Docker Installed Linux/MacOS OS/VMs.
+# How to Run the ```apisec-private-scanner-docker.sh``` in Docker Installed Linux/MacOS VMs.
 
 ##       Use-Case 1: To Deploy Regular Scanner.       
        Syntax:        bash apisec-private-scanner-docker.sh --host "<hostname/IP>"    --scannerName <scannerName>    --fx-iam <FX_IAM>                            --fx-key <FX_KEY>   
