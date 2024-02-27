@@ -19,7 +19,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,scannerName:,portNumber:,fx-iam:,fx-key:,imag
                     --platform) FX_PLATFORM="$2"; shift;;
                     --concurrentConsumers) FX_CONCURRENT_CONSUMERS="$2"; shift;;
                     --maxConcurrentConsumers) FX_MAX_CONCURRENT_CONSUMERS="$2"; shift;;
-                    --delay) FX_DELAY="$2"; shift;;                    
+                    --delay) FX_DELAY="$2"; shift;;
                     --) shift;;
              esac
              shift;
@@ -45,40 +45,53 @@ then
 FX_IMAGE_TAG="latest"
 fi
 
+echo " "
+read -p "Please Enter '1' to Deploy a scanner OR Enter '2' to Restart the scanner OR  Enter '3' to Refresh the scanner: " option
 
-if [ "$FX_DELAY" != "" ] && [ "$FX_CONCURRENT_CONSUMERS" != "" ] && [ "$FX_MAX_CONCURRENT_CONSUMERS" != "" ]; then
-          echo "Deploying Rate-Limiting Scanner with Delay: "$FX_DELAY", concurrentCoumsers: "$FX_CONCURRENT_CONSUMERS" and maxConcurrentConsumers: $FX_MAX_CONCURRENT_CONSUMERS"
-          deleteScanner=$(kubectl get po | grep $FX_SCANNER_NAME)
-          if [ "$deleteScanner" != "" ]; then
+if [ "$option" = "1" ]; then
+          checkScanner=$(kubectl get po | grep $FX_SCANNER_NAME)
+          if [ "$checkScanner" != "" ]; then
+                 echo " "
+                 echo "Kubernetes Pod/Scanner with '$FX_SCANNER_NAME' name already exists, so won't deploy it!!"
+          else
+                 echo "Deploying '$FX_SCANNER_NAME'  Scanner!!"
+                 kubectl run $FX_SCANNER_NAME --env="FX_HOST=$FX_HOST" --env="FX_IAM=$FX_IAM" --env="FX_KEY=$FX_KEY" --env="FX_PORT=$FX_PORT" --env="FX_SSL=$FX_SSL" --image="apisec/scanner:$FX_IMAGE_TAG" --image-pull-policy=IfNotPresent
+                 sleep 10
+                 kubectl get po
+                 echo " "
+                 echo "'$FX_SCANNER_NAME' Scanner Deployment is successfully completed!!"
+          fi
+elif [ "$option" = "2" ]; then
+          checkScanner=$(kubectl get po | grep $FX_SCANNER_NAME)
+          if [ "$checkScanner" != "" ]; then
+                 echo "Restarting  '$FX_SCANNER_NAME'  Scanner!!"
                  kubectl delete po $FX_SCANNER_NAME
-          fi          
-          kubectl run $FX_SCANNER_NAME --env="FX_HOST=$FX_HOST" --env="FX_IAM=$FX_IAM" --env="FX_KEY=$FX_KEY" --env="FX_PORT=$FX_PORT" --env="FX_SSL=$FX_SSL" --env="concurrentConsumers=$FX_CONCURRENT_CONSUMERS" --env="maxConcurrentConsumers=$FX_MAX_CONCURRENT_CONSUMERS" --env="delay=$FX_DELAY" --image="apisec/scanner:$FX_IMAGE_TAG"
-          sleep 10
-          kubectl get po
-elif [ "$FX_CONCURRENT_CONSUMERS" != "" ] && [ "$FX_MAX_CONCURRENT_CONSUMERS" != "" ]; then
-          echo "Deploying Scanner with concurrentCoumsers: $FX_CONCURRENT_CONSUMERS and maxConcurrentConsumers: $FX_MAX_CONCURRENT_CONSUMERS"
-          deleteScanner=$(kubectl get po | grep $FX_SCANNER_NAME)
-          if [ "$deleteScanner" != "" ]; then
+                 kubectl run $FX_SCANNER_NAME --env="FX_HOST=$FX_HOST" --env="FX_IAM=$FX_IAM" --env="FX_KEY=$FX_KEY" --env="FX_PORT=$FX_PORT" --env="FX_SSL=$FX_SSL" --image="apisec/scanner:$FX_IMAGE_TAG" --image-pull-policy=IfNotPresent
+                 sleep 5
+                 kubectl get po
+                 echo " "
+                 echo "'$FX_SCANNER_NAME' Scanner is successfully restarted!!"
+          else
+                echo " "
+                echo "No Kubernetes Pod/Scanner with '$FX_SCANNER_NAME' name exists to restart. Please Deploy it!!"
+          fi
+elif [ "$option" = "3" ]; then
+          checkScanner=$(kubectl get po | grep $FX_SCANNER_NAME)
+          if [ "$checkScanner" != "" ]; then
+                 echo "Refreshing  '$FX_SCANNER_NAME'  Scanner!!"
                  kubectl delete po $FX_SCANNER_NAME
-          fi          
-          kubectl run $FX_SCANNER_NAME --env="FX_HOST=$FX_HOST" --env="FX_IAM=$FX_IAM" --env="FX_KEY=$FX_KEY" --env="FX_PORT=$FX_PORT" --env="FX_SSL=$FX_SSL" --env="concurrentConsumers=$FX_CONCURRENT_CONSUMERS" --env="maxConcurrentConsumers=$FX_MAX_CONCURRENT_CONSUMERS" --image="apisec/scanner:$FX_IMAGE_TAG"
-          sleep 10
-          kubectl get po
-elif [ "$FX_DELAY" != "" ]; then
-          echo "Deploying Scanner with Delay: $FX_DELAY"
-          deleteScanner=$(kubectl get po| grep $FX_SCANNER_NAME)
-          if [ "$deleteScanner" != "" ]; then
-                 kubectl delete po $FX_SCANNER_NAME
-          fi          
-          kubectl run $FX_SCANNER_NAME --env="FX_HOST=$FX_HOST" --env="FX_IAM=$FX_IAM" --env="FX_KEY=$FX_KEY" --env="FX_PORT=$FX_PORT" --env="FX_SSL=$FX_SSL" --env="delay=$FX_DELAY" --image="apisec/scanner:$FX_IMAGE_TAG"
-          sleep 10
-          kubectl get po
-else                   
-          deleteScanner=$(kubectl get po| grep $FX_SCANNER_NAME)
-          if [ "$deleteScanner" != "" ]; then
-                 kubectl delete po $FX_SCANNER_NAME
-          fi          
-          kubectl run $FX_SCANNER_NAME --env="FX_HOST=$FX_HOST" --env="FX_IAM=$FX_IAM" --env="FX_KEY=$FX_KEY" --env="FX_PORT=$FX_PORT" --env="FX_SSL=$FX_SSL" --image="apisec/scanner:$FX_IMAGE_TAG"
-          sleep 10
-          kubectl get po
+                 kubectl run $FX_SCANNER_NAME --env="FX_HOST=$FX_HOST" --env="FX_IAM=$FX_IAM" --env="FX_KEY=$FX_KEY" --env="FX_PORT=$FX_PORT" --env="FX_SSL=$FX_SSL" --image="apisec/scanner:$FX_IMAGE_TAG" --image-pull-policy=Always
+                 sleep 10
+                 kubectl get po 
+                 echo " "
+                 echo "'$FX_SCANNER_NAME' Scanner is successfully refreshed!!"
+          else
+                echo " "
+                echo "No Kubernetes Pod/Scanner with '$FX_SCANNER_NAME' name exists to refresh. Please Deploy it!!"
+          fi
+else
+     echo " "
+     echo "Entered Option: $option"
+     echo "You Didn't specify correct option. Please rerun the script again and specify right option based on your requirement!!"
 fi
+

@@ -1,4 +1,4 @@
-param ($host ="cloud.apisec.ai",
+param ($hostName ="cloud.apisec.ai",
 $scannerName,
 $fxIam,
 $fxKey,
@@ -9,7 +9,7 @@ $concurrentConsumers,
 $maxConcurrentConsumers,
 $delay)
 
-$FX_HOST=$host
+$FX_HOST=$hostName
 $FX_SCANNER_NAME=$scannerName
 $FX_IAM=$fxIam
 $FX_KEY=$fxKey
@@ -20,35 +20,66 @@ $FX_CONCURRENT_CONSUMERS=$concurrentConsumers
 $FX_MAX_CONCURRENT_CONSUMERS=$maxConcurrentConsumers
 $FX_DELAY=$delay
 
-if ($FX_DELAY -ne "" -and $FX_CONCURRENT_CONSUMERS -ne "" -and $FX_MAX_CONCURRENT_CONSUMERS -ne "") {
-    Write-Host "Deploying Rate-Limiting Scanner with Delay: $FX_DELAY, concurrentCoumsers: $FX_CONCURRENT_CONSUMERS and maxConcurrentConsumers: $FX_MAX_CONCURRENT_CONSUMERS"
-    deleteScanner=$(docker ps -a | Select-String -Pattern "$FX_SCANNER_NAME")
-    if ($deleteScanner -ne ""){
-        docker rm -f $FX_SCANNER_NAME
-    }
-    docker pull apisec/scanner:$FX_IMAGE_TAG
-    docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL -e concurrentConsumers=$FX_CONCURRENT_CONSUMERS -e maxConcurrentConsumers=$FX_MAX_CONCURRENT_CONSUMERS -e delay=$FX_DELAY apisec/scanner:$FX_IMAGE_TAG
-    sleep 10
-    docker ps
+
+$Option= Read-Host "Please Enter '1' to Deploy a scanner OR Enter '2' to Restart the scanner OR  Enter '3' to Refresh the scanner: "
+
+
+if ($Option -eq "1" ){
+      checkScanner=$(docker ps -a | Select-String -Pattern $FX_SCANNER_NAME)
+      if ($checkScanner -ne "") {
+                 Write-Host " "
+                 Write-Host "Docker Container/Scanner with '$FX_SCANNER_NAME' name already exists, so won't deploy it!!"
+      }
+      else  {
+                 Write-Host "Deploying '$FX_SCANNER_NAME'  Scanner!!"
+                 docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL  apisec/scanner:$FX_IMAGE_TAG
+                 sleep 10
+                 docker ps
+                 Write-Host " "
+                 Write-Host "'$FX_SCANNER_NAME' Scanner Deployment is successfully completed!!"
+      }
 }
-elseif ( $FX_CONCURRENT_CONSUMERS -ne "" -and $FX_MAX_CONCURRENT_CONSUMERS -ne "") {
-    Write-Host "Deploying Scanner with concurrentCoumsers: $FX_CONCURRENT_CONSUMERS and maxConcurrentConsumers: $FX_MAX_CONCURRENT_CONSUMERS"
-    deleteScanner=$(docker ps -a | Select-String -Pattern "$FX_SCANNER_NAME")
-    if ($deleteScanner -ne ""){
-        docker rm -f $FX_SCANNER_NAME
-    }
-    docker pull apisec/scanner:$FX_IMAGE_TAG
-    docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL -e concurrentConsumers=$FX_CONCURRENT_CONSUMERS -e maxConcurrentConsumers=$FX_MAX_CONCURRENT_CONSUMERS -e delay=$FX_DELAY apisec/scanner:$FX_IMAGE_TAG
-    sleep 10
-    docker ps
+elseif ($Option -eq "2" ){
+
+      checkScanner=$(docker ps -a | Select-String -Pattern $FX_SCANNER_NAME)
+      if ($checkScanner -ne "") {
+                 Write-Host "Restarting  '$FX_SCANNER_NAME'  Scanner!!"
+                 docker restart $FX_SCANNER_NAME
+                 sleep 5
+                 docker ps
+                 Write-Host " "
+                 Write-Host "'$FX_SCANNER_NAME' Scanner is successfully restarted!!"
+      }
+      else  {
+                Write-Host  " "
+                Write-Host "No Docker Container/Scanner with '$FX_SCANNER_NAME' name exists to restart. Please Deploy it!!"
+      }
+
+
 }
-else{
-    deleteScanner=$(docker ps -a | Select-String -Pattern "$FX_SCANNER_NAME")
-    if ($deleteScanner -ne ""){
-        docker rm -f $FX_SCANNER_NAME
-    }
-    docker pull apisec/scanner:$FX_IMAGE_TAG
-    docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL -e concurrentConsumers=$FX_CONCURRENT_CONSUMERS -e maxConcurrentConsumers=$FX_MAX_CONCURRENT_CONSUMERS -e delay=$FX_DELAY apisec/scanner:$FX_IMAGE_TAG
-    sleep 10
-    docker ps
+
+elseif ($Option -eq "3" ){
+
+      checkScanner=$(docker ps -a | Select-String -Pattern $FX_SCANNER_NAME)
+      if ($checkScanner -ne "") {
+                 Write-Host "Refreshing  '$FX_SCANNER_NAME'  Scanner!!"
+                 docker rm -f $FX_SCANNER_NAME
+                 sleep 5
+                 docker pull apisec/scanner:$FX_IMAGE_TAG
+                 docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL  apisec/scanner:$FX_IMAGE_TAG
+                 sleep 10
+                 docker ps
+                 Write-Host " "
+                 Write-Host "'$FX_SCANNER_NAME' Scanner is successfully refreshed!!"
+      }
+      else  {
+                Write-Host  " "
+                Write-Host "No Docker Container/Scanner with '$FX_SCANNER_NAME' name exists to refresh. Please Deploy it!!"
+      }
+}
+
+else  {
+         Write-Host " "
+         Write-Host "Entered Option: $option"
+         Write-Host "You Didn't specify correct option. Please rerun the script again and specify right option based on your requirement!!"
 }

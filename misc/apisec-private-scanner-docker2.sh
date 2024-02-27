@@ -103,3 +103,45 @@ else
      echo "You Didn't specify correct option. Please rerun the script again and specify right option based on your requirement!!"
 fi
 
+exit 0
+
+if [ "$FX_DELAY" != "" ] && [ "$FX_CONCURRENT_CONSUMERS" != "" ] && [ "$FX_MAX_CONCURRENT_CONSUMERS" != "" ]; then
+          echo "Deploying Rate-Limiting Scanner with Delay: "$FX_DELAY", concurrentCoumsers: "$FX_CONCURRENT_CONSUMERS" and maxConcurrentConsumers: $FX_MAX_CONCURRENT_CONSUMERS"
+          deleteScanner=$(sudo docker ps -a | grep $FX_SCANNER_NAME)
+          if [ "$deleteScanner" != "" ]; then
+                 sudo docker rm -f $FX_SCANNER_NAME
+          fi
+          sudo docker pull apisec/scanner:$FX_IMAGE_TAG
+          sudo  docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL -e concurrentConsumers=$FX_CONCURRENT_CONSUMERS -e maxConcurrentConsumers=$FX_MAX_CONCURRENT_CONSUMERS -e delay=$FX_DELAY apisec/scanner:$FX_IMAGE_TAG
+          sleep 10
+          sudo docker ps
+elif [ "$FX_CONCURRENT_CONSUMERS" != "" ] && [ "$FX_MAX_CONCURRENT_CONSUMERS" != "" ]; then
+          echo "Deploying Scanner with concurrentCoumsers: $FX_CONCURRENT_CONSUMERS and maxConcurrentConsumers: $FX_MAX_CONCURRENT_CONSUMERS"
+          deleteScanner=$(sudo docker ps -a | grep $FX_SCANNER_NAME)
+          if [ "$deleteScanner" != "" ]; then
+                 sudo docker rm -f $FX_SCANNER_NAME
+          fi
+          sudo docker pull apisec/scanner:$FX_IMAGE_TAG
+          sudo  docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL -e concurrentConsumers=$FX_CONCURRENT_CONSUMERS -e maxConcurrentConsumers=$FX_MAX_CONCURRENT_CONSUMERS apisec/scanner:$FX_IMAGE_TAG
+          sleep 10
+          sudo docker ps
+elif [ "$FX_DELAY" != "" ]; then
+          echo "Deploying Scanner with Delay: $FX_DELAY"
+          deleteScanner=$(sudo docker ps -a | grep $FX_SCANNER_NAME)
+          if [ "$deleteScanner" != "" ]; then
+                 sudo docker rm -f $FX_SCANNER_NAME
+          fi
+          sudo docker pull apisec/scanner:$FX_IMAGE_TAG
+          sudo  docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL -e concurrentConsumers=$FX_CONCURRENT_CONSUMERS -e maxConcurrentConsumers=$FX_MAX_CONCURRENT_CONSUMERS -e delay=$FX_DELAY apisec/scanner:$FX_IMAGE_TAG
+          sleep 10
+          sudo docker ps
+else          
+          deleteScanner=$(sudo docker ps -a | grep $FX_SCANNER_NAME)
+          if [ "$deleteScanner" != "" ]; then
+                 sudo docker rm -f $FX_SCANNER_NAME
+          fi
+          sudo docker pull apisec/scanner:$FX_IMAGE_TAG
+          sudo  docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL  apisec/scanner:$FX_IMAGE_TAG
+          sleep 10
+          sudo docker ps
+fi
