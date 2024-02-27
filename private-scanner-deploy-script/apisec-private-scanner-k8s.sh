@@ -73,8 +73,7 @@ elif [ "$FX_DELAY" != "" ]; then
           kubectl run $FX_SCANNER_NAME --env="FX_HOST=$FX_HOST" --env="FX_IAM=$FX_IAM" --env="FX_KEY=$FX_KEY" --env="FX_PORT=$FX_PORT" --env="FX_SSL=$FX_SSL" --env="delay=$FX_DELAY" --image="apisec/scanner:$FX_IMAGE_TAG"
           sleep 10
           kubectl get po
-else          
-          echo "Deploying Scanner with Delay: $FX_DELAY"
+else                   
           deleteScanner=$(kubectl get po| grep $FX_SCANNER_NAME)
           if [ "$deleteScanner" != "" ]; then
                  kubectl delete po $FX_SCANNER_NAME

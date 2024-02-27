@@ -76,8 +76,7 @@ elif [ "$FX_DELAY" != "" ]; then
           sudo  docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL -e concurrentConsumers=$FX_CONCURRENT_CONSUMERS -e maxConcurrentConsumers=$FX_MAX_CONCURRENT_CONSUMERS -e delay=$FX_DELAY apisec/scanner:$FX_IMAGE_TAG
           sleep 10
           sudo docker ps
-else
-          echo "Default usecae"
+else          
           deleteScanner=$(sudo docker ps -a | grep $FX_SCANNER_NAME)
           if [ "$deleteScanner" != "" ]; then
                  sudo docker rm -f $FX_SCANNER_NAME
