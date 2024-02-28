@@ -24,7 +24,7 @@ Write-Host "Press '1' to Deploy  APIsec Scanner!!"
 Write-Host "Press '2' to Restart APIsec Scanner!!"
 Write-Host "Press '3' to Refresh APIsec Scanner!!"
 
-$Option= Read-Host ""Enter Your Option"
+$Option= Read-Host "Enter Your Option"
 
 
 if ($Option -eq "1" ){
