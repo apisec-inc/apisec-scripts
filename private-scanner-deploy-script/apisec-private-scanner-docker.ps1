@@ -25,8 +25,8 @@ $Option= Read-Host "Please Enter '1' to Deploy a scanner OR Enter '2' to Restart
 
 
 if ($Option -eq "1" ){
-      checkScanner=$(docker ps -a | Select-String -Pattern $FX_SCANNER_NAME)
-      if ($checkScanner -ne "") {
+      $checkScanner= docker ps -a | Select-String -Pattern "$FX_SCANNER_NAME"
+      if ($checkScanner -ne $null) {
                  Write-Host " "
                  Write-Host "Docker Container/Scanner with '$FX_SCANNER_NAME' name already exists, so won't deploy it!!"
       }
@@ -41,8 +41,8 @@ if ($Option -eq "1" ){
 }
 elseif ($Option -eq "2" ){
 
-      checkScanner=$(docker ps -a | Select-String -Pattern $FX_SCANNER_NAME)
-      if ($checkScanner -ne "") {
+      $checkScanner= docker ps -a | Select-String -Pattern "$FX_SCANNER_NAME"
+      if ($checkScanner -ne $null) {
                  Write-Host "Restarting  '$FX_SCANNER_NAME'  Scanner!!"
                  docker restart $FX_SCANNER_NAME
                  sleep 5
@@ -60,8 +60,8 @@ elseif ($Option -eq "2" ){
 
 elseif ($Option -eq "3" ){
 
-      checkScanner=$(docker ps -a | Select-String -Pattern $FX_SCANNER_NAME)
-      if ($checkScanner -ne "") {
+      $checkScanner= docker ps -a | Select-String -Pattern "$FX_SCANNER_NAME"
+      if ($checkScanner -ne $null) {
                  Write-Host "Refreshing  '$FX_SCANNER_NAME'  Scanner!!"
                  docker rm -f $FX_SCANNER_NAME
                  sleep 5
