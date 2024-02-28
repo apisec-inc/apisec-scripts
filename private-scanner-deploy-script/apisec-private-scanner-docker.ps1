@@ -20,8 +20,11 @@ $FX_CONCURRENT_CONSUMERS=$concurrentConsumers
 $FX_MAX_CONCURRENT_CONSUMERS=$maxConcurrentConsumers
 $FX_DELAY=$delay
 
+Write-Host "Press '1' to Deploy  APIsec Scanner!!"
+Write-Host "Press '2' to Restart APIsec Scanner!!"
+Write-Host "Press '3' to Refresh APIsec Scanner!!"
 
-$Option= Read-Host "Please Enter '1' to Deploy a scanner OR Enter '2' to Restart the scanner OR  Enter '3' to Refresh the scanner: "
+$Option= Read-Host ""Enter Your Option"
 
 
 if ($Option -eq "1" ){

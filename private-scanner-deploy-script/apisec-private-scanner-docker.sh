@@ -46,14 +46,18 @@ FX_IMAGE_TAG="latest"
 fi
 
 echo " "
-read -p "Please Enter '1' to Deploy a scanner OR Enter '2' to Restart the scanner OR  Enter '3' to Refresh the scanner: " option
+echo "Press '1' to Deploy  APIsec Scanner!!"
+echo "Press '2' to Restart APIsec Scanner!!"
+echo "Press '3' to Refresh APIsec Scanner!!"
+
+read -p "Enter Your Option: " option
 
 if [ "$option" = "1" ]; then
           checkScanner=$(sudo docker ps -a | grep $FX_SCANNER_NAME)
           if [ "$checkScanner" != "" ]; then
                  #sudo docker rm -f $FX_SCANNER_NAME
                  echo " "
-                 echo "Docker Container/Scanner with '$FX_SCANNER_NAME' name already exists, so won't deploy it!!"
+                 echo "Docker Container/Scanner with '$FX_SCANNER_NAME' name already exists!!"
           else
                  echo "Deploying '$FX_SCANNER_NAME'  Scanner!!"
                  #sudo docker pull apisec/scanner:$FX_IMAGE_TAG

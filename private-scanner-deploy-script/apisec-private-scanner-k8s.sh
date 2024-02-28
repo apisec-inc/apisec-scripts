@@ -46,13 +46,19 @@ FX_IMAGE_TAG="latest"
 fi
 
 echo " "
-read -p "Please Enter '1' to Deploy a scanner OR Enter '2' to Restart the scanner OR  Enter '3' to Refresh the scanner: " option
+echo "Press '1' to Deploy  APIsec Scanner!!"
+echo "Press '2' to Restart APIsec Scanner!!"
+echo "Press '3' to Refresh APIsec Scanner!!"
+
+read -p "Enter Your Option: " option
+
+
 
 if [ "$option" = "1" ]; then
           checkScanner=$(kubectl get po | grep $FX_SCANNER_NAME)
           if [ "$checkScanner" != "" ]; then
                  echo " "
-                 echo "Kubernetes Pod/Scanner with '$FX_SCANNER_NAME' name already exists, so won't deploy it!!"
+                 echo "Kubernetes Pod/Scanner with '$FX_SCANNER_NAME' name already exists!!"
           else
                  echo "Deploying '$FX_SCANNER_NAME'  Scanner!!"
                  kubectl run $FX_SCANNER_NAME --env="FX_HOST=$FX_HOST" --env="FX_IAM=$FX_IAM" --env="FX_KEY=$FX_KEY" --env="FX_PORT=$FX_PORT" --env="FX_SSL=$FX_SSL" --image="apisec/scanner:$FX_IMAGE_TAG" --image-pull-policy=IfNotPresent
