@@ -41,8 +41,8 @@
                                        "Press '3' to Refresh APIsec Scanner!!"
                                                           
 
-       Syntax:        powershell -File apisec-private-scanner-docker.ps1 -host  <hostname/IP>    -scannerName <scannerName>    -fxIam <FX_IAM>                            -fxKey <FX_KEY>   
-       Example-Usage: powershell -File apisec-private-scanner-docker.ps1 -host "cloud.apisec.ai" -scannerName "apisec-demo"    -fxIam "wzQosLb96KtdxfRjbl6jMGFpWEYYajgd"  -fxKey "cNc4bKuaXCH9/8l1nYSgPYYRIWmN9vX+3f/zsea6VfSBsbDbrPJVow=="    
+       Syntax:        powershell -File apisec-private-scanner-docker.ps1 -hostName  <hostname/IP>    -scannerName <scannerName>    -fxIam <FX_IAM>                            -fxKey <FX_KEY>   
+       Example-Usage: powershell -File apisec-private-scanner-docker.ps1 -hostName "cloud.apisec.ai" -scannerName "apisec-demo"    -fxIam "wzQosLb96KtdxfRjbl6jMGFpWEYYajgd"  -fxKey "cNc4bKuaXCH9/8l1nYSgPYYRIWmN9vX+3f/zsea6VfSBsbDbrPJVow=="    
 
 
 
