@@ -31,7 +31,7 @@ if ($Option -eq "1" ){
       $checkScanner= docker ps -a | Select-String -Pattern "$FX_SCANNER_NAME"
       if ($checkScanner -ne $null) {
                  Write-Host " "
-                 Write-Host "Docker Container/Scanner with '$FX_SCANNER_NAME' name already exists, so won't deploy it!!"
+                 Write-Host "Docker Container/Scanner with '$FX_SCANNER_NAME' name already exists!!"
       }
       else  {
                  Write-Host "Deploying '$FX_SCANNER_NAME'  Scanner!!"
