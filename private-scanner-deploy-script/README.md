@@ -1,6 +1,6 @@
 # How to Deploy APIsec Scanner in Customer's On-Prem Environments
 
-##     How to Run the ```apisec-private-scanner-docker.sh``` in Docker Installed Linux/MacOS VMs.   
+##     How to Run the ```apisec-private-scanner-docker.sh``` in Docker Installed Linux VMs.   
        Script flow of execution: Run the script as shown in below syntax replacing relevant Key-Value pairs with your specific scanner ones.
                                  Once you run the script, it will prompt user with below options, pick one based on your requirements.
                                  Any other enter argument/value will result in you having to re-run the script again.
