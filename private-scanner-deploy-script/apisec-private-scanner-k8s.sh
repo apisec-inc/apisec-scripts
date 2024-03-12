@@ -24,7 +24,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,scannerName:,portNumber:,fx-iam:,fx-key:,imag
              esac
              shift;
     done
-
+FX_SCANNER_NAME=$(echo "$FX_SCANNER_NAME" | tr A-Z a-z )
 if [ "$FX_HOST" = "" ];
 then
 FX_HOST="cloud.apisec.ai"
