@@ -69,7 +69,7 @@ if [ "$option" = "1" ]; then
                  #sudo docker pull apisec/scanner:$FX_IMAGE_TAG
                  sudo  docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL  apisec/scanner:$FX_IMAGE_TAG 
                  sleep 10
-                 sudo docker ps
+                 sudo docker ps -a | grep $FX_SCANNER_NAME
                  echo " "
                  sleep 5
                  sudo docker logs $FX_SCANNER_NAME
@@ -83,7 +83,7 @@ elif [ "$option" = "2" ]; then
                  echo "Restarting  '$FX_SCANNER_NAME'  Scanner!!"
                  sudo docker restart $FX_SCANNER_NAME
                  sleep 5
-                 sudo docker ps
+                 sudo docker ps -a | grep $FX_SCANNER_NAME
                  echo " "
                  sleep 5
                  sudo docker logs $FX_SCANNER_NAME
@@ -106,7 +106,7 @@ elif [ "$option" = "3" ]; then
                  sudo docker pull apisec/scanner:$FX_IMAGE_TAG
                  sudo  docker run --name $FX_SCANNER_NAME -d -e FX_HOST=$FX_HOST -e FX_IAM=$FX_IAM -e FX_KEY=$FX_KEY -e FX_PORT=$FX_PORT -e FX_SSL=$FX_SSL  apisec/scanner:$FX_IMAGE_TAG
                  sleep 10
-                 sudo docker ps
+                 sudo docker ps -a | grep $FX_SCANNER_NAME
                  echo " "
                  sleep 5
                  sudo docker logs $FX_SCANNER_NAME
