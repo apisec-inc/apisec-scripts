@@ -229,12 +229,12 @@ if [ "$OAS" = true ]; then
                                             exit 0
                                       fi
 
-                                      if [ $retryCount -ge 55  ]; then
-                                           echo " "
-                                           retryCount=`expr $retryCount \* 2`  
-                                           echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
-                                           exit 1
-                                      fi
+                                    #   if [ $retryCount -ge 55  ]; then
+                                    #        echo " "
+                                    #        retryCount=`expr $retryCount \* 2`  
+                                    #        echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
+                                    #        exit 1
+                                    #   fi
                                  done
                         REFRESH_PLAYBOOKS=false
                 fi   
@@ -273,12 +273,12 @@ if [ "$OAS" = true ]; then
                               #exit 0
                         fi
 
-                        if [ $retryCount -ge 55  ]; then
-                             echo " "
-                             retryCount=`expr $retryCount \* 2`  
-                             echo "Playbook Regenerate Task Status is $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
-                             exit 1
-                        fi                            
+                        # if [ $retryCount -ge 55  ]; then
+                        #      echo " "
+                        #      retryCount=`expr $retryCount \* 2`  
+                        #      echo "Playbook Regenerate Task Status is $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
+                        #      exit 1
+                        # fi                            
                     done       
      fi
     
@@ -341,12 +341,12 @@ if [ "$OASFile" = true ]; then
                                        exit 0
                                 fi
 
-                                if [ $retryCount -ge 55  ]; then
-                                       echo " "
-                                       retryCount=`expr $retryCount \* 2`  
-                                       echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
-                                       exit 1
-                                fi
+                              #   if [ $retryCount -ge 55  ]; then
+                              #          echo " "
+                              #          retryCount=`expr $retryCount \* 2`  
+                              #          echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
+                              #          exit 1
+                              #   fi
                             done      
              fi
       elif [ "$getProjectNameFile" == "$PROJECT_NAME" ];then
@@ -385,12 +385,12 @@ if [ "$OASFile" = true ]; then
                               #exit 0
                         fi
 
-                        if [ $retryCount -ge 55  ]; then
-                             echo " "
-                             retryCount=`expr $retryCount \* 2`  
-                             echo "Playbook Regenerate Task Status is $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
-                             exit 1
-                        fi                            
+                        # if [ $retryCount -ge 55  ]; then
+                        #      echo " "
+                        #      retryCount=`expr $retryCount \* 2`  
+                        #      echo "Playbook Regenerate Task Status is $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
+                        #      exit 1
+                        # fi                            
                     done    
    
 
@@ -462,12 +462,12 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
                                          exit 0
                                   fi
 
-                                  if [ $retryCount -ge 55  ]; then
-                                         echo " "
-                                         retryCount=`expr $retryCount \* 2`  
-                                         echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
-                                         exit 1
-                                  fi
+                              #     if [ $retryCount -ge 55  ]; then
+                              #            echo " "
+                              #            retryCount=`expr $retryCount \* 2`  
+                              #            echo "Playbooks Generation Task Status $playbookTaskStatus even after $retryCount seconds, so halting/breaking script execution!!!"
+                              #            exit 1
+                              #     fi
                             done
              fi
       elif [ "$getProjectNameFile" == "$PROJECT_NAME" ];then
@@ -505,12 +505,12 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
                               #exit 0
                         fi
 
-                        if [ $retryCount -ge 55  ]; then
-                             echo " "
-                             retryCount=`expr $retryCount \* 2`  
-                             echo "Playbook Regenerate Task Status is $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
-                             exit 1
-                        fi                            
+                        # if [ $retryCount -ge 55  ]; then
+                        #      echo " "
+                        #      retryCount=`expr $retryCount \* 2`  
+                        #      echo "Playbook Regenerate Task Status is $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
+                        #      exit 1
+                        # fi                            
                     done       
 
       fi
@@ -601,12 +601,12 @@ if [ "$REFRESH_PLAYBOOKS" = true ]; then
                             echo "Playbooks refresh task is succesfully completed!!!"
                       fi
 
-                      if [ $retryCount -ge 55  ]; then
-                           echo " "
-                           retryCount=`expr $retryCount \* 2`  
-                           echo "Playbook refresh Task Status $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
-                           exit 1
-                      fi                            
+                  #     if [ $retryCount -ge 55  ]; then
+                  #          echo " "
+                  #          retryCount=`expr $retryCount \* 2`  
+                  #          echo "Playbook refresh Task Status $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
+                  #          exit 1
+                  #     fi                            
                   done
       fi
 fi
