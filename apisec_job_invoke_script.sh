@@ -216,7 +216,7 @@ if [ "$OAS" = true ]; then
                                       fi
                                       pCount=`expr $pCount + 1`  
                                       retryCount=`expr $retryCount + 1`  
-                                      sleep 2
+                                      sleep 20
 
                                       playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${project_id}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                                       #playbookTaskStatus="In_progress"
@@ -260,7 +260,7 @@ if [ "$OAS" = true ]; then
                         fi
                         pCount=`expr $pCount + 1`  
                         retryCount=`expr $retryCount + 1`  
-                        sleep 2
+                        sleep 20
                         playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                 
                         if [ "$playbookTaskStatus" == "Done" ]; then
@@ -328,7 +328,7 @@ if [ "$OASFile" = true ]; then
                                 fi
                                 pCount=`expr $pCount + 1`  
                                 retryCount=`expr $retryCount + 1`  
-                                sleep 2
+                                sleep 20
 
                                 playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${project_id}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                                 #playbookTaskStatus="In_progress"
@@ -372,7 +372,7 @@ if [ "$OASFile" = true ]; then
                         fi
                         pCount=`expr $pCount + 1`  
                         retryCount=`expr $retryCount + 1`  
-                        sleep 2
+                        sleep 20
                         playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                 
                         if [ "$playbookTaskStatus" == "Done" ]; then
@@ -450,7 +450,7 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
                                   fi
                                   pCount=`expr $pCount + 1`  
                                   retryCount=`expr $retryCount + 1`  
-                                  sleep 10
+                                  sleep 20
                                   playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${project_id}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                                   #playbookTaskStatus="In_progress"
                                   if [ "$playbookTaskStatus" == "Done" ]; then
@@ -493,7 +493,7 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
                         fi
                         pCount=`expr $pCount + 1`  
                         retryCount=`expr $retryCount + 1`  
-                        sleep 2
+                        sleep 20
                         playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
                 
                         if [ "$playbookTaskStatus" == "Done" ]; then
