@@ -290,7 +290,7 @@ if [ "$OASFile" = true ]; then
       fileExt=$(echo $openText)
       if [[ "$fileExt" == *"yaml"* ]] ||  [[ "$fileExt" == *"yml"* ]]; then
              echo "yaml file upload option is used."
-             openText=$(yq -r -o=json $openText)
+             openText=$(yq eval -o=json $openText)
              openText=$(echo $openText |  jq . -Rc)
       fi
 
@@ -407,7 +407,7 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
              echo "yaml file upload option is used."
              wget $INTERNAL_OPEN_API_SPEC_URL -O open-api-spec.yaml
              openText1=open-api-spec.yaml            
-             openText=$(yq -r -o=json $openText1)
+             openText=$(yq eval -o=json $openText1)
              openText=$(echo $openText |  jq . -Rc)
              rm -rf open-api-spec.yaml
       fi
