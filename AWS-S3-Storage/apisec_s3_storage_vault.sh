@@ -138,6 +138,7 @@ if   [ $count -eq 0 ]; then
        vault_type=$(jq -r '.accountType' <<< "$data")
        vault_bucket_name=$(jq -r '.bucketName' <<< "$data")
        vault_bucket_region=$(jq -r '.region' <<< "$data")
+       vault_isDefaultStore=$(jq -r '.isDefaultStore' <<< "$data")
        if [ -z "$vault_id" ] || [  "$vault_id" == null ]; then                   
                    message=$(jq -r '.message' <<< "$response") 
                    echo "Error Message: $message"
@@ -150,6 +151,7 @@ if   [ $count -eq 0 ]; then
                   echo "Vault AccountType: $vault_type"
                   echo "Bucket Name: $vault_bucket_name"
                   echo "Bucket Region: $vault_bucket_region"
+                  echo "IsStorageDefaultStoreActive: $vault_isDefaultStore"
                   echo " "
        fi
 elif [ $count -eq 1 ]; then
@@ -164,6 +166,7 @@ elif [ $count -eq 1 ]; then
              vault_type=$(jq -r '.accountType' <<< "$data")
              vault_bucket_name=$(jq -r '.bucketName' <<< "$data")
              vault_bucket_region=$(jq -r '.region' <<< "$data")
+             vault_isDefaultStore=$(jq -r '.isDefaultStore' <<< "$data")
              if [ -z "$vault_id" ] || [  "$vault_id" == null ]; then                       
                        message=$(jq -r '.messages' <<< "$response") 
                        echo "Error Message: $message"
@@ -176,6 +179,7 @@ elif [ $count -eq 1 ]; then
                       echo "Vault AccountType: $vault_type"
                       echo "Bucket Name: $vault_bucket_name"
                       echo "Bucket Region: $vault_bucket_region"
+                      echo "IsStorageDefaultStoreActive: $vault_isDefaultStore"
                       echo " "
              fi             
 
@@ -216,9 +220,10 @@ if [ "$PROJECT_NAME_FLAG" = true ]; then
                   exit 1
             elif [ $rCount -eq 1 ]; then
                    projData=$(curl -s --location --request GET "${FX_HOST}/api/v1/report-setting/project/${PROJECT_ID}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
-                   updatedProjData=$(echo "$projData" | jq -c --argjson account "$rDto" --argjson inactive "$IN_ACTIVE" '.account = $account | .inactive = $inactive')
+                   updatedProjData=$(echo "$projData" | jq -c --argjson account "$rDto" --argjson inactive "$IN_ACTIVE" --arg projectId "$PROJECT_ID" '.account = $account | .inactive = $inactive | .projectId = $projectId')
                    reportsData=$(curl -s --location --request POST "${FX_HOST}/api/v1/report-setting" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$updatedProjData")
-                   #updatedReportsStorageDetails=$(echo "$reportsData" | jq -r '.data.account')
+                   updateProjectId=$(echo "$reportsData" | jq -r '.data.projectId')
+                   updateProjectInActive=$(echo "$reportsData" | jq -r '.data.inactive')
                    updatedProjectVaultName=$(echo "$reportsData" | jq -r '.data.account.name')
                    updatedProjectVaultId=$(echo "$reportsData" | jq -r '.data.account.id')
                    updatedProjectVaultaccountType=$(echo "$reportsData" | jq -r '.data.account.accountType')
@@ -226,14 +231,14 @@ if [ "$PROJECT_NAME_FLAG" = true ]; then
                    updatedProjectVaultBucketRegion=$(echo "$reportsData" | jq -r '.data.account.region')
                    echo "Successfully Updated '$getProjectName' project with '$FX_VAULT_ACCOUNT' as reportStorage account!!"
                    echo "ProjectName: $getProjectName"
-                   echo "ProjectId: $PROJECT_ID"
-                   #echo "updatedReportsStorageDetails: $updatedReportsStorageDetails"
+                   echo "ProjectId: $updateProjectId"                   
                    echo "updatedReportsStorageDetails:"
                    echo "VaultName: $updatedProjectVaultName"
                    echo "Vault_ID: $updatedProjectVaultId"
                    echo "Vault AccountType: $updatedProjectVaultaccountType"
                    echo "Bucket Name: $updatedProjectVaultBucketName"
                    echo "Bucket Region: $updatedProjectVaultBucketRegion"
+                   echo "IsProjectStorageAccountInActive: $updateProjectInActive"
                    echo " "
             fi       
       fi
