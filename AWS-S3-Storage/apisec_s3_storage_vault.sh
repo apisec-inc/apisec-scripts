@@ -130,8 +130,7 @@ while [ $page -le $pages ]
     done
 if   [ $count -eq 0 ]; then
        echo "Vault Account with the name '$FX_VAULT_ACCOUNT' doesn't exists, so creating it!!"                                                                                                                                          
-       response=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $token"  -X POST  "${FX_HOST}/api/v1/accounts" -d '{"isDefaultStore": '${IS_DEFAULT_STORE}',"name":"'${FX_VAULT_ACCOUNT}'","accountType":"AWS_S3","region":"'${FX_BUCKET_REGION}'","accessKey":"'${FX_ACCESS_KEY}'","secretKey":"'${FX_SECRET_KEY}'","bucketName":"'${FX_BUCKET_NAME}'"}')    
-       echo $response                                
+       response=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $token"  -X POST  "${FX_HOST}/api/v1/accounts" -d '{"isDefaultStore": '${IS_DEFAULT_STORE}',"name":"'${FX_VAULT_ACCOUNT}'","accountType":"AWS_S3","region":"'${FX_BUCKET_REGION}'","accessKey":"'${FX_ACCESS_KEY}'","secretKey":"'${FX_SECRET_KEY}'","bucketName":"'${FX_BUCKET_NAME}'"}')                                
        data=$(jq -r '.data' <<< "$response")
        echo ' '
        vault_name=$(jq -r '.name' <<< "$data")
