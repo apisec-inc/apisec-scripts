@@ -173,15 +173,15 @@ if [ "$FX_S3_REPORT_TYPE" == "" ]; then
 elif [ "$FX_S3_REPORT_TYPE" == "PROJECT_PEN_TEST_REPORT" ]; then
         FX_S3_REPORT_TYPE_FLAG=true
         S3_REPORT_TYPE="pentest"
-        FX_EMAIL_REPORT=false
+        #FX_EMAIL_REPORT=false
 elif [ "$FX_S3_REPORT_TYPE" == "DEVELOPER_REPORT" ]; then
         FX_S3_REPORT_TYPE_FLAG=true
         S3_REPORT_TYPE="developer"
-        FX_EMAIL_REPORT=false
+        #FX_EMAIL_REPORT=false
 elif [ "$FX_S3_REPORT_TYPE" == "COMPLIANCE" ]; then
         FX_S3_REPORT_TYPE_FLAG=true
         S3_REPORT_TYPE="compliance"
-        FX_EMAIL_REPORT=false
+        #FX_EMAIL_REPORT=false
 else 
         FX_S3_REPORT_TYPE_FLAG=false              
 fi
