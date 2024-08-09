@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin
 
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,s3Report,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,baseUrl:,category:,tier:,tags:, header_1:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,s3ReportType,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,baseUrl:,category:,tier:,tags:, header_1:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -20,7 +20,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
 		    
                     --emailReport) FX_EMAIL_REPORT="$2"; shift;;
                     --reportType) FX_REPORT_TYPE="$2"; shift;;
-                    --s3Report) FX_S3_REPORT_TYPE="$2"; shift;;
+                    --s3ReportType) FX_S3_REPORT_TYPE="$2"; shift;;
 
                     # To Fail script execution on Vulnerable severity
                     --fail-on-vuln-severity) FAIL_ON_VULN_SEVERITY="$2"; shift;;
@@ -169,10 +169,21 @@ else
 fi
 
 if [ "$FX_S3_REPORT_TYPE" == "" ]; then
-      FX_S3_REPORT_TYPE_FLAG=false
-elif [ "$FX_S3_REPORT_TYPE" == "true" ]; then
-     FX_S3_REPORT_TYPE_FLAG=true
-     FX_EMAIL_REPORT=false
+        FX_S3_REPORT_TYPE_FLAG=false
+elif [ "$FX_S3_REPORT_TYPE" == "PROJECT_PEN_TEST_REPORT" ]; then
+        FX_S3_REPORT_TYPE_FLAG=true
+        S3_REPORT_TYPE="pentest"
+        FX_EMAIL_REPORT=false
+elif [ "$FX_S3_REPORT_TYPE" == "DEVELOPER_REPORT" ]; then
+        FX_S3_REPORT_TYPE_FLAG=true
+        S3_REPORT_TYPE="developer"
+        FX_EMAIL_REPORT=false
+elif [ "$FX_S3_REPORT_TYPE" == "COMPLIANCE" ]; then
+        FX_S3_REPORT_TYPE_FLAG=true
+        S3_REPORT_TYPE="compliance"
+        FX_EMAIL_REPORT=false
+else 
+        FX_S3_REPORT_TYPE_FLAG=false              
 fi
 tokenResp=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login )
 #tokenResp1=$(echo "$tokenResp" | jq -r . | cut -d: -f1 | cut -d{ -f1 | cut -d} -f2 | cut -d'"' -f2)
@@ -1249,7 +1260,7 @@ else
                                     fi
                                     if [ "$FX_S3_REPORT_TYPE_FLAG" = true ]; then
                                           sleep 10
-                                          s3_report_response=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $token"   -X GET   "${FX_HOST}/api/v1/reports/project/${projectId}/compliance?fileType=PDF")
+                                          s3_report_response=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $token"   -X GET   "${FX_HOST}/api/v1/reports/project/${projectId}/${S3_REPORT_TYPE}?fileType=PDF")
                                           errorMsgFlag=$(echo "$s3_report_response" | jq -r '.errors')
                                           if [ $errorMsgFlag = false ]; then
                                                projData=$(curl -s --location --request GET "${FX_HOST}/api/v1/report-setting/project/${projectId}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
@@ -1259,23 +1270,23 @@ else
                                                #echo "Is Project StorageAccount InActive: $IsProjectStorageAccountInActive"
                                                if [ "$isProjStorageAccountNull" = null ]; then
                                                       if [ $IsProjectStorageAccountInActive = true ]; then
-                                                               echo "Report will only be Email as your project storage account is empty and inactive!!"
+                                                               echo "'${FX_S3_REPORT_TYPE}' Report will only be Email as your project storage account is empty and inactive!!"
                                                       else
-                                                               echo "Report will only be Email as your project storage account is empty!!"
+                                                               echo "'${FX_S3_REPORT_TYPE}' Report will only be Email as your project storage account is empty!!"
                                                       fi
                                                elif [ "$isProjStorageAccountNull" != null ]; then
                                                        projStorageAccountName=$(echo "$isProjStorageAccountNull" | jq -r '.name')
                                                        if [ $IsProjectStorageAccountInActive = true ]; then
-                                                               echo "Report will only be Email as your project's '$projStorageAccountName' storage account is inactive!!"
+                                                               echo "'${FX_S3_REPORT_TYPE}' Report will only be Email as your project's '$projStorageAccountName' storage account is inactive!!"
                                                        elif [ $IsProjectStorageAccountInActive = false ]; then
                                                                projStorageAccountType=$(echo "$isProjStorageAccountNull" | jq -r '.accountType')
                                                                if [ "$projStorageAccountType" == "AWS_S3" ]; then
                                                                      projStorageBucketName=$(echo "$isProjStorageAccountNull" | jq -r '.bucketName')
                                                                      projStorageBucketRegion=$(echo "$isProjStorageAccountNull" | jq -r '.region')
-                                                                     echo "Report Will be Email and store in your '$projStorageBucketName' S3 bucket of '$projStorageBucketRegion' region in AWS through '$projStorageAccountName' storage account register in APIsec vault!!"
+                                                                     echo "'${FX_S3_REPORT_TYPE}' Report Will be Email and store in your '$projStorageBucketName' S3 bucket of '$projStorageBucketRegion' region in AWS through '$projStorageAccountName' storage account register in APIsec vault!!"
                                                                      echo " "
                                                                else
-                                                                     echo "Report Will only be Email as as your project's '$projStorageAccountName' storage account is of type '$projStorageAccountType' and not of 'AWS_S3' type!!"
+                                                                     echo "'${FX_S3_REPORT_TYPE}' Report Will only be Email as your project's '$projStorageAccountName' storage account is of type '$projStorageAccountType' and not of 'AWS_S3' type!!"
                                                                fi
                                                        fi
 
