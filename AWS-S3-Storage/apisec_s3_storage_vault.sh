@@ -146,12 +146,12 @@ if   [ $count -eq 0 ]; then
                    exit 1
        else
                   echo "Successfully Created Vault!!"       
-                  echo "VaultName: $vault_name"
-                  echo "Vault_ID: $vault_id"
-                  echo "Vault AccountType: $vault_type"
-                  echo "Bucket Name: $vault_bucket_name"
-                  echo "Bucket Region: $vault_bucket_region"
-                  echo "IsStorageDefaultStoreActive: $vault_isDefaultStore"
+                  echo "VaultName: '$vault_name'"
+                  echo "Vault_ID: '$vault_id'"
+                  echo "Vault AccountType: '$vault_type'"
+                  echo "Bucket Name: '$vault_bucket_name'"
+                  echo "Bucket Region: '$vault_bucket_region'"
+                  echo "IsStorageDefaultStoreActive: '$vault_isDefaultStore'"
                   echo " "
        fi
 elif [ $count -eq 1 ]; then
@@ -174,12 +174,12 @@ elif [ $count -eq 1 ]; then
                        exit 1
              else
                       echo "Successfully Updated Vault!!"               
-                      echo "VaultName: $vault_name"
-                      echo "Vault_ID: $vault_id"
-                      echo "Vault AccountType: $vault_type"
-                      echo "Bucket Name: $vault_bucket_name"
-                      echo "Bucket Region: $vault_bucket_region"
-                      echo "IsStorageDefaultStoreActive: $vault_isDefaultStore"
+                      echo "VaultName: '$vault_name'"
+                      echo "Vault_ID: '$vault_id'"
+                      echo "Vault AccountType: '$vault_type'"
+                      echo "Bucket Name: '$vault_bucket_name'"
+                      echo "Bucket Region: '$vault_bucket_region'"
+                      echo "IsStorageDefaultStoreActive: '$vault_isDefaultStore'"
                       echo " "
              fi             
 
@@ -230,15 +230,15 @@ if [ "$PROJECT_NAME_FLAG" = true ]; then
                    updatedProjectVaultBucketName=$(echo "$reportsData" | jq -r '.data.account.bucketName')
                    updatedProjectVaultBucketRegion=$(echo "$reportsData" | jq -r '.data.account.region')
                    echo "Successfully Updated '$getProjectName' project with '$FX_VAULT_ACCOUNT' as reportStorage account!!"
-                   echo "ProjectName: $getProjectName"
-                   echo "ProjectId: $updateProjectId"                   
+                   echo "ProjectName: '$getProjectName'"
+                   echo "ProjectId: '$updateProjectId'"                   
                    echo "updatedReportsStorageDetails:"
-                   echo "VaultName: $updatedProjectVaultName"
-                   echo "Vault_ID: $updatedProjectVaultId"
-                   echo "Vault AccountType: $updatedProjectVaultaccountType"
-                   echo "Bucket Name: $updatedProjectVaultBucketName"
-                   echo "Bucket Region: $updatedProjectVaultBucketRegion"
-                   echo "IsProjectStorageAccountInActive: $updateProjectInActive"
+                   echo "VaultName: '$updatedProjectVaultName'"
+                   echo "Vault_ID: '$updatedProjectVaultId'"
+                   echo "Vault AccountType: '$updatedProjectVaultaccountType'"
+                   echo "Bucket Name: '$updatedProjectVaultBucketName'"
+                   echo "Bucket Region: '$updatedProjectVaultBucketRegion'"
+                   echo "IsProjectStorageAccountInActive: '$updateProjectInActive'"
                    echo " "
             fi       
       fi
