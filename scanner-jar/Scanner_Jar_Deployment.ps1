@@ -1,4 +1,5 @@
-# .\script.ps1 -fx_host "your-fx-host" -fx_key "your-fx-key" -fx_iam "your-fx-iam"
+# .\Scanner_Jar_Deployment.ps1 -fx_host "your-fx-host" -fx_key "your-fx-key" -fx_iam "your-fx-iam"
+
 param(
     [string]$fx_host,
     [string]$fx_key,
