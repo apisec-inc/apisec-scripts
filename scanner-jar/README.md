@@ -1,5 +1,8 @@
 # Deploying APIsec Scanner as a jar file
-## Prerequisite: Java-17, FX_HOST, FX_IAM & FX_KEY from APIsec scanner
+## Prerequisite: 
+Java-17, FX_HOST, FX_IAM & FX_KEY from APIsec scanner
+
+
 Please use the below commands for deploying the APIsec Scanner as a jar file. Make sure to update the placeholders <FX_HOST>, <FX_IAM>, and <FX_KEY>.
 
 ## on Windows machine with Powershell.
