@@ -27,5 +27,5 @@ Step 2: Run The Downloaded Bash Script.
     bash Scanner_Jar_Deployment.sh --fx-host "<FX_HOST>" --fx-iam "<FX_IAM>" --fx-key "<FX_KEY>"
     
 
-Please refer to the following documentation for detailed instructions on creating a scanner instance in APIsec:
+Please refer to the following documentation for detailed instructions on creating a scanner instance in APIsec product: https://cloud.apisec.ai 
 https://docs.apisec.ai/DeployScanners/
