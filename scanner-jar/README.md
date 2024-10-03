@@ -3,7 +3,10 @@
 Java-17 and FX_HOST, FX_IAM & FX_KEY values from the APIsec scanner.
 
 
-Please use the below command to deploy the APIsec Scanner as a jar. Make sure to update the placeholders <FX_HOST>, <FX_IAM>, and <FX_KEY> before executing the script.
+Please use the following commands to deploy the APIsec Scanner as a jar file. Make sure to replace the placeholders <FX_HOST>, <FX_IAM>, and <FX_KEY> with the actual values.
+
+You can obtain these values from the Scanner Module page after logging into the APIsec portal.
+
 ## on Windows machine with Powershell.
 ``` wget https://raw.githubusercontent.com/apisec-inc/apisec-scripts/refs/heads/master/scanner-jar/Scanner_Jar_Deployment.ps1 -O Scanner_Jar_Deployment.ps1 ```
 
@@ -14,3 +17,6 @@ Please use the below command to deploy the APIsec Scanner as a jar. Make sure to
 ``` wget https://raw.githubusercontent.com/apisec-inc/apisec-scripts/refs/heads/master/scanner-jar/Scanner_Jar_Deployment.sh -O Scanner_Jar_Deployment.sh ```
 
 ```./Scanner_Jar_Deployment.sh --fx-host "<FX_HOST>" --fx-iam "<FX_IAM>" --fx-key "<FX_KEY>"```
+
+Please refer to the following documentation for detailed instructions on creating a scanner instance in APIsec:
+https://docs.apisec.ai/DeployScanners/
