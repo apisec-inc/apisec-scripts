@@ -23,8 +23,9 @@ TEMP=$(getopt -n "$0" -a -l "fx-host:,fx-iam:,fx-key:,github-access-token:" -- -
              shift;
     done
 
-curl -s -O https://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@raw.githubusercontent.com/apisec-inc/Release/main/Scanner/bot.jar
+#curl -s -O https://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@raw.githubusercontent.com/apisec-inc/Release/main/Scanner/bot.jar
 #curl -s -O https://$GITHUB_ACCESS_TOKEN@raw.githubusercontent.com/apisec-inc/Release/main/Scanner/bot.jar
+wget https://github.com/apisec-inc/apisec-scripts/raw/refs/heads/master/scanner-jar/bot.jar
 
 export FX_HOST="$FX_HOST"
 export FX_IAM="$FX_IAM"
