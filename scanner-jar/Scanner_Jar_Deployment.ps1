@@ -1,7 +1,8 @@
-# .\Scanner_Jar_Deployment.ps1 -fx_host "your-fx-host" -fx_key "your-fx-key" -fx_iam "your-fx-iam"
+# .\Scanner_Jar_Deployment.ps1 -fx_host "your-fx-host" -fx_key "your-fx-key" -fx_iam "your-fx-iam" -fx_port "443"
 
 param(
     [string]$fx_host,
+	[string]$fx_port,
     [string]$fx_key,
     [string]$fx_iam
 )
@@ -10,6 +11,7 @@ $botJarUrl = "https://raw.githubusercontent.com/apisec-inc/apisec-scripts/refs/h
 $botJarPath = ".\bot.jar"
 $Env:SPRING_AMQP_DESERIALIZATION_TRUST_ALL = "true"
 $Env:FX_HOST = $fx_host
+$Env:FX_PORT = $fx_port
 $Env:FX_KEY = $fx_key
 $Env:FX_IAM = $fx_iam
 
