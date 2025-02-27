@@ -14,7 +14,7 @@ Step 1: Download The Powershell script
     
 Step 2: Run The Downloaded Powershell Script.
 
-    powershell -File Scanner_Jar_Deployment.ps1 -fx_host "<FX_HOST>" -fx_iam "<FX_IAM>" -fx_key "<FX_KEY>"
+    powershell -File Scanner_Jar_Deployment.ps1 -fx_host "<FX_HOST>" -fx_iam "<FX_IAM>" -fx_key "<FX_KEY>" -fx_port "443"
 
 
 ## on Ubuntu machine.
