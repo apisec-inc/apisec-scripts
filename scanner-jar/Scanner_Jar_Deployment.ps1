@@ -1,4 +1,4 @@
-# .\Scanner_Jar_Deployment.ps1 -fx_host "your-fx-host" -fx_key "your-fx-key" -fx_iam "your-fx-iam" -fx_port "443"
+# .\Scanner_Jar_Deployment.ps1 -fx_host "scanner.apisec.ai" -fx_key "your-fx-key" -fx_iam "your-fx-iam" -fx_port "443"
 
 param(
     [string]$fx_host,
@@ -6,6 +6,9 @@ param(
     [string]$fx_key,
     [string]$fx_iam
 )
+
+# Enable TLS protocols
+[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 
 $botJarUrl = "https://raw.githubusercontent.com/apisec-inc/apisec-scripts/refs/heads/master/scanner-jar/bot.jar"
 $botJarPath = ".\bot.jar"
