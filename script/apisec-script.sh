@@ -578,40 +578,52 @@ fi
 if [ "$REFRESH_PLAYBOOKS" = true ]; then
      #dto=$(curl -s --location --request GET  "${FX_HOST}/api/v1/projects/find-by-name/${FX_PROJECT_NAME}" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
      projectId=$(echo "$dto" | jq -r '.id')
-     updatedData=$(curl -s -X PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto")
-     uErrorsFlag=$(echo $updatedData | jq -r '.errors')
-     if [ $uErrorsFlag = true ]; then     
-           errMsg=$(echo "$updatedData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')                                                                  
-           echo $errMsg
-           exit 1
-     elif [ $uErrorsFlag = false ]; then                              
-            playbookTaskStatus="In_progress"
-            echo "playbookTaskStatus = " $playbookTaskStatus
-            retryCount=0
-            pCount=0
+     prePlaybookRefreshTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
+     if [ "$prePlaybookRefreshTaskStatus" == "Done" ]; then
+           #echo "prePlaybookRefreshTaskStatus = " $prePlaybookRefreshTaskStatus
+           #exit 0
+           updatedData=$(curl -s -X PUT "${FX_HOST}/api/v1/projects/${projectId}/refresh-specs" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$dto")
+           uErrorsFlag=$(echo $updatedData | jq -r '.errors')
+           if [ $uErrorsFlag = true ]; then
+                 errMsg=$(echo "$updatedData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')
+                 echo $errMsg
+                 exit 1
+           elif [ $uErrorsFlag = false ]; then
+                  playbookTaskStatus="In_progress"
+                  echo "playbookTaskStatus = " $playbookTaskStatus
+                  retryCount=0
+                  pCount=0
 
-            while [ "$playbookTaskStatus" == "In_progress" ]
-                  do
-                      if [ $pCount -eq 0 ]; then
-                           echo "Checking playbooks refresh task Status...."
-                      fi
-                      pCount=`expr $pCount + 1`  
-                      retryCount=`expr $retryCount + 1`  
-                      sleep 2
+                  while [ "$playbookTaskStatus" == "In_progress" ]
+                        do
+                            if [ $pCount -eq 0 ]; then
+                                 echo "Checking playbooks refresh task Status...."
+                            fi
+                            pCount=`expr $pCount + 1`
+                            retryCount=`expr $retryCount + 1`
+                            sleep 2
 
-                      playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
-                      #playbookTaskStatus="In_progress"
-                      if [ "$playbookTaskStatus" == "Done" ]; then
-                            echo "Playbooks refresh task is succesfully completed!!!"
-                      fi
+                            playbookTaskStatus=$(curl -s -X GET "${FX_HOST}/api/v1/events/project/${projectId}/Sync" -H "accept: */*" -H "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '."data".status')
+                            #playbookTaskStatus="In_progress"
+                            if [ "$playbookTaskStatus" == "Done" ]; then
+                                  echo "Playbooks refresh task is succesfully completed!!!"
+                                  echo " "
+                                  exit 0
+                            fi
 
-                  #     if [ $retryCount -ge 55  ]; then
-                  #          echo " "
-                  #          retryCount=`expr $retryCount \* 2`  
-                  #          echo "Playbook refresh Task Status $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
-                  #          exit 1
-                  #     fi                            
-                  done
+                            if [ $retryCount -ge 55  ]; then
+                                 echo " "
+                                 retryCount=`expr $retryCount \* 2`
+                                 echo "Playbook refresh Task for the '$FX_PROJECT_NAME' project would be completed in a short while!!"
+                                 echo " "
+                                 #echo "Playbook refresh Task Status $playbookTaskStatus even after $retryCount seconds, so halting script execution!!!"
+                                 exit 0
+                            fi
+                       done
+           fi
+      elif [  "$prePlaybookRefreshTaskStatus" == "In_progress" ]; then
+               echo "There's already playbook refresh task is running for the '$FX_PROJECT_NAME' project!!"
+               exit 0
       fi
 fi
 
@@ -690,7 +702,7 @@ if [ "$PROFILE_SCANNER_FLAG" = true ]; then
                                      echo "ProfileId: $profId"
                                      echo "UpdatedScannerName: $updatedScanner"
                                      echo " " 
-                                     #exit 0
+                                     exit 0
                               fi
                                                   
                        fi
@@ -781,6 +793,7 @@ if   [ "$AUTH_FLAG" = true  ]; then
                                                                                                      echo "EnvironmentId: $eId" 
                                                                                                      echo "UpdatedAuth: $updatedAuthObj"
                                                                                                      echo " "
+                                                                                                     exit 0
                                                                                               fi
                                                                                        done
                                                                            fi            
@@ -817,6 +830,7 @@ if   [ "$AUTH_FLAG" = true  ]; then
                                                                                                      echo "EnvironmentId: $eId" 
                                                                                                      echo "UpdatedAuth: $updatedAuthObj"
                                                                                                      echo " "
+                                                                                                     exit 0
                                                                                               fi
                                                                                        done
                                                                            fi              
@@ -856,7 +870,8 @@ if   [ "$AUTH_FLAG" = true  ]; then
                                                                                                      echo "EnvironmentName: $ENV_NAME" 
                                                                                                      echo "EnvironmentId: $eId" 
                                                                                                      echo "UpdatedAuth: $updatedAuthObj"
-                                                                                                     echo " "                                                                                                     
+                                                                                                     echo " "
+                                                                                                     exit 0
                                                                                               fi
                                                                                        done
                                                                            fi 
@@ -917,8 +932,9 @@ if [ "$BASE_URL_FLAG" = true ]; then
                                   echo "EnvironmentName: $ENV_NAME"
                                   echo "EnvironmentId: $eId"
                                   echo "UpdatedBaseUrl: $updatedBaseUrl"
-                                  echo " "                    
-                           fi        
+                                  echo " "
+                                  exit 0
+                           fi
                fi
         done
 
