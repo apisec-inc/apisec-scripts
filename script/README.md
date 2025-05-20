@@ -54,15 +54,35 @@
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --baseUrl <baseUrl-of-the-openApiSpec>   
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --baseUrl   "http://netbanking.apisec.ai:8080"
 
-##       Use-Case 7: To Configure a Project's Profile with a scanner.
+##       Use-Case 7: To Configure a Project's Profile for following profile use-cases.
+       Use-Case 7a. To Configure a Project's Profile with a scanner and categories
+       Script flow of execution: Script will update/configure a scanner and categories of an existing profile  like ```Master``` in an existing project.
+                                 
+       
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileScanner <Scanner-Name-To-Be-Configure>  --profileCategories "<Comma Separated Category Names>"               --profile <Profile-Name>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --profileScanner "Super_3"                       --profileCategories "Unsecured,ABAC_Level1,Linux_Command_Injection"  --profile "Master"
+       
+      
+
+
+       Use-Case 7b. To Configure a Project's Profile with a scanner
        Script flow of execution: Script will update/configure a scanner of an existing profile  like ```Master``` in an existing project.
                                  
        
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileScanner <Scanner-Name-To-Be-Configure> --profile <Profile-Name>
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --profileScanner "Super_3"                      --profile "Master" 
        
-       Note!!: If no profile name is passed with this use-case then Master profile will get configured with the passed scanner.
+       
 
+
+       Use-Case 7c. To Configure a Project's Profile with  categories
+       Script flow of execution: Script will update/configure a categories of an existing profile  like ```Master``` in an existing project.
+                                 
+       
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileCategories "<Comma Separated Category Names>"               --profile <Profile-Name>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --profileCategories "Unsecured,ABAC_Level1,Linux_Command_Injection"  --profile "Master" 
+       
+       Note!!: If no profile name is passed with these use-cases then Master profile will get configured.       
 
 ##       Use-Case 8: To Refresh/Reload  a Project's SPecs.
        Script flow of execution: Script will Refresh/Reload of an existing project specs.
