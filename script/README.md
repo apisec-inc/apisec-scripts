@@ -34,28 +34,28 @@
        
 
 ##       Use-Case 4: To Configure a Project's Basic AuthType Credentials.
-       Script flow of execution: Script will update an auth of type ```Basic``` of an exisitng environment like ```Master``` in an existing project and later trigger a scan.
+       Script flow of execution: Script will update an auth of type ```Basic``` of an exisitng environment like ```Master``` in an existing project.
                                  
        
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password <app password> 
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --authName "Default"     --app_username "user1@netbanking.io"   --app_password "admin@1234"
 
 ##       Use-Case 5: To Configure a Project's Token AuthType Credentials.
-       Script flow of execution: Script will update an auth of type ```Token``` of an exisitng environment like ```Master``` in an existing project and later trigger a scan.
+       Script flow of execution: Script will update an auth of type ```Token``` of an exisitng environment like ```Master``` in an existing project.
                                  
        
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --authName <auth Name>   --header_1 <complete header 1 curl request to  generate token>
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --authName "ROLE_PM"     --header_1 "Authorization: Bearer {{@CmdCache | curl -s -d '{"\"""username"\""":"\"""admin"\""","\"""password"\""":"\"""secret"\"""}' -H 'Content-Type: application/json' -H 'Accept: application/json' -X POST https://ip/user/login | jq --raw-output '.info.token' }}"
        
 ##       Use-Case 6: To Configure a Project's BaseUrl.
-       Script flow of execution: Script will update ```baseUrl``` of an exisitng environment like ```Master``` in an existing project and later trigger a scan.
+       Script flow of execution: Script will update ```baseUrl``` of an exisitng environment like ```Master``` in an existing project.
                                  
        
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --baseUrl <baseUrl-of-the-openApiSpec>   
        Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --baseUrl   "http://netbanking.apisec.ai:8080"
 
 ##       Use-Case 7: To Configure a Project's Profile with a scanner.
-       Script flow of execution: Script will update/configure a scanner of an existing profile  like ```Master``` in an existing project and later trigger a scan.
+       Script flow of execution: Script will update/configure a scanner of an existing profile  like ```Master``` in an existing project.
                                  
        
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileScanner <Scanner-Name-To-Be-Configure> --profile <Profile-Name>
@@ -65,7 +65,7 @@
 
 
 ##       Use-Case 8: To Refresh/Reload  a Project's SPecs.
-       Script flow of execution: Script will Refresh/Reload of an existing project specs and later trigger a scan.
+       Script flow of execution: Script will Refresh/Reload of an existing project specs.
                                  
        
        Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --refresh-playbooks <true/false>
