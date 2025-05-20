@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin
 
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,baseUrl:,category:,tier:,tags:, header_1:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,profileCategories:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,baseUrl:,category:,tier:,tags:, header_1:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -40,7 +40,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
 
                     # For Project Profile To be Updated with a scanner
                     --profileScanner) PROFILE_SCANNER="$2"; shift;;
-		    
+		        --profileCategories) PROFILE_CATEGORIES="$2"; shift;;
                     # For Project Credentials Update
                     --envName) ENV_NAME="$2"; shift;;                        
                     --authName) AUTH_NAME="$2"; shift;;       
@@ -125,11 +125,17 @@ if   [ "$REFRESH_PLAYBOOKS" == ""  ]; then
 fi
 
 # For Project Profile To be Updated with a scanner
-if   [ "$PROFILE_SCANNER" == ""  ] || [ "$PROFILE_NAME" == ""  ];  then
-        PROFILE_SCANNER_FLAG=false
-else 
+if   [ "$PROFILE_SCANNER" != ""  ] && [ "$PROFILE_NAME" != ""  ] && [ "$PROFILE_CATEGORIES" != "" ];  then
         PROFILE_SCANNER_FLAG=true
         SCANNER_NAME=$(echo $PROFILE_SCANNER)
+elif [ "$PROFILE_SCANNER" != ""  ] && [ "$PROFILE_NAME" != ""  ]; then
+        PROFILE_SCANNER_FLAG=true
+        SCANNER_NAME=$(echo $PROFILE_SCANNER)
+elif [ "$PROFILE_CATEGORIES" != ""  ] && [ "$PROFILE_NAME" != ""  ]; then
+        PROFILE_SCANNER_FLAG=true
+else
+        PROFILE_SCANNER_FLAG=false
+        #SCANNER_NAME=$(echo $PROFILE_SCANNER)
 fi
 
 # To check scanner exists
@@ -646,68 +652,223 @@ if [ "$PROFILE_SCANNER_FLAG" = true ]; then
                  exit 1
             fi            
 
-            scanData=$(curl -s --location --request GET "$FX_HOST/api/v1/bot-clusters?page=0&pageSize=20&sort=createdDate&sortType=DESC"  --header "Authorization: Bearer "$token"")
-            scanCount=0            
-            scanners_Names=$(jq -r '.data[].name' <<< "$scanData")
-            org_Name=$(echo "$scanData" | jq -r '.data[].org.name')
-            org_Name=$(echo "$org_Name" | sort -u)
-            for sName in ${scanners_Names}
-               do 
-                   if [ "$sName" == "$PROFILE_SCANNER" ]; then   
-                         scanCount=`expr $scanCount + 1`  
-                   fi
-               done
-            superScanData=$(curl -s --location --request GET "$FX_HOST/api/v1/bot-clusters/superbotnetwork?page=0&pageSize=20&sort=createdDate&sortType=DESC"  --header "Authorization: Bearer "$token"")
-            super_scanners_Names=$(jq -r '.data[].name' <<< "$superScanData")
-            for sName in ${super_scanners_Names}
-               do 
-                   if [ "$sName" == "$PROFILE_SCANNER" ]; then   
-                         scanCount=`expr $scanCount + 1`  
-                   fi
-               done               
-            if [ $scanCount -le 0 ]; then
-                 echo "$PROFILE_SCANNER scanner doesn't exists!!"
-                 exit 1
-            fi
+            if [ "$PROFILE_SCANNER" != "" ]; then
 
-            for row in $(echo "${data}" | jq -r '. | @base64'); 
+                  scanData=$(curl -s --location --request GET "$FX_HOST/api/v1/bot-clusters?page=0&pageSize=20&sort=createdDate&sortType=DESC"  --header "Authorization: Bearer "$token"")
+                  scanCount=0
+                  scanners_Names=$(jq -r '.data[].name' <<< "$scanData")
+                  org_Name=$(echo "$scanData" | jq -r '.data[].org.name')
+                  org_Name=$(echo "$org_Name" | sort -u)
+                  for sName in ${scanners_Names}
+                     do
+                         if [ "$sName" == "$PROFILE_SCANNER" ]; then
+                               scanCount=`expr $scanCount + 1`
+                         fi
+                     done
+                  superScanData=$(curl -s --location --request GET "$FX_HOST/api/v1/bot-clusters/superbotnetwork?page=0&pageSize=20&sort=createdDate&sortType=DESC"  --header "Authorization: Bearer "$token"")
+                  super_scanners_Names=$(jq -r '.data[].name' <<< "$superScanData")
+                  for sName in ${super_scanners_Names}
+                     do
+                         if [ "$sName" == "$PROFILE_SCANNER" ]; then
+                               scanCount=`expr $scanCount + 1`
+                         fi
+                     done
+                  if [ $scanCount -le 0 ]; then
+                       echo "$PROFILE_SCANNER scanner doesn't exists!!"
+                       exit 1
+                  fi
+            fi
+            if [ "$PROFILE_CATEGORIES" != "" ]; then
+                  #curl -s --location --request GET "https://developer.apisec.ai/api/v1/projects/8a74e6a996d8e3cd0196e7e26e5f4012/autocodeconfig" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data.generators[].inactive'
+                  #exit 0
+                  autoCodeConfigData=$(curl -s --location --request GET "$FX_HOST/api/v1/projects/${PROJECT_ID}/autocodeconfig" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" | jq -r '.data')
+                  readarray -t genData < <(echo "$autoCodeConfigData" | jq -c '.generators[]')
+                  modifiedProfileCategories=$( echo "$PROFILE_CATEGORIES" | sed 's/,/ /g' )
+                  mProfileCategoriesCount=0
+                  inactiveProfileCategoriesCount=0
+                  invalidProfileCategoriesCount=0
+                  for cat in ${modifiedProfileCategories}
+                      do
+                           catExistCount=0
+                           for apps in "${genData[@]}"
+                               do
+                                    genCat=$(echo "$apps" | jq -r '.category')
+                                    if [ "$cat" == "$genCat" ]; then
+                                          #echo "Passed Category Exists: $cat"
+                                          genCatStatus=$(echo "$apps" | jq -r '.inactive')
+                                          if [ "$genCatStatus" == "false" ]; then
+                                                catExistCount=`expr $catExistCount + 1`
+                                                if [ $mProfileCategoriesCount -eq 0 ]; then
+                                                     mPROFILE_CATEGORIES=$cat
+                                                     mProfileCategoriesCount=`expr $mProfileCategoriesCount + 1`
+                                                else
+                                                     mPROFILE_CATEGORIES+=",$cat"
+                                                fi
+                                                #echo "Passed '$cat' Category inactive status = $genCatStatus which means category is active!!"
+                                                #echo " "
+                                          elif [ "$genCatStatus" == "true" ]; then
+                                                  catExistCount=`expr $catExistCount + 1`
+
+                                                  #echo "Passed '$cat' Category inactive status = $genCatStatus which means category is inactive!!"
+                                                  #echo " "
+                                                if [ $inactiveProfileCategoriesCount -eq 0 ]; then
+                                                     inactive_PROFILE_CATEGORIES=$cat
+                                                     inactiveProfileCategoriesCount=`expr $inactiveProfileCategoriesCount + 1`
+                                                else
+                                                     inactive_PROFILE_CATEGORIES+=",$cat"
+                                                fi
+                                          fi
+                                    fi
+                               done
+                           if [ $catExistCount -eq 0  ]; then
+                                #echo "Passed '$cat' Category seems to be invalid category!!"
+                                #echo " "
+                                if [ $invalidProfileCategoriesCount -eq 0 ]; then
+                                      invalid_PROFILE_CATEGORIES=$cat
+                                      invalidProfileCategoriesCount=`expr $invalidProfileCategoriesCount + 1`
+                                else
+                                      invalid_PROFILE_CATEGORIES+=",$cat"
+                                fi
+                           fi
+                      done
+                  if [ "$mPROFILE_CATEGORIES" != "" ]; then
+                        if [ $inactiveProfileCategoriesCount -gt 0 ]; then
+                              echo "Following are inactive cateories and will not be updated in '$PROFILE_NAME' profile of '$FX_PROJECT_NAME' project!!"
+                              echo "$inactive_PROFILE_CATEGORIES"
+                              echo " "
+                        fi
+                        if [ $invalidProfileCategoriesCount -gt 0 ]; then
+                              echo "Following are invalid Cateories  and cannot be updated in '$PROFILE_NAME' profile of '$FX_PROJECT_NAME' project!!"
+                              echo "$invalid_PROFILE_CATEGORIES"
+                              echo " "
+                        fi
+                        echo "Following Cateories will be updated in '$PROFILE_NAME' profile of '$FX_PROJECT_NAME' project!!"
+                        echo "$mPROFILE_CATEGORIES"
+                        echo " "
+                        #echo "Done Script Execution!!"
+                        #exit 0
+                  else
+                        if [ $inactiveProfileCategoriesCount -gt 0 ] && [ $invalidProfileCategoriesCount -gt 0 ]; then
+                              echo "Following are inactive cateories and will not be updated in '$PROFILE_NAME' profile of '$FX_PROJECT_NAME' project!!"
+                              echo "$inactive_PROFILE_CATEGORIES"
+                              echo " "
+                              echo "Following are invalid cateories and cannot be updated in '$PROFILE_NAME' profile of '$FX_PROJECT_NAME' project!!"
+                              echo "$invalid_PROFILE_CATEGORIES"
+                              echo " "
+                              echo "Please provide valid and active categories names to proceed with '$PROFILE_NAME' profile update!!"
+                              echo " "
+                              exit 1
+
+                        else
+                              echo "'$PROFILE_NAME' profile cannot be updated as all Categories passed are seems to be invalid categories!!"
+                              echo "$PROFILE_CATEGORIES"
+                              echo " "
+                              echo "Please provide valid and active categories names to proceed with '$PROFILE_NAME' profile update!!"
+                              echo " "
+                              exit 1
+                        fi
+                  fi
+            fi
+            for row in $(echo "${data}" | jq -r '. | @base64');
                 do
                        _jq() {
                              echo ${row} | base64 --decode | jq -r ${1}
                        }
                        profName=$(echo $(_jq '.') | jq  -r '.name')
-                       profId=$(echo $(_jq '.') | jq  -r '.id')    
+                       profId=$(echo $(_jq '.') | jq  -r '.id')
                        if [ "$PROFILE_NAME" == "$profName"  ]; then
-                              echo "Updating $PROFILE_NAME profile with $SCANNER_NAME scanner in $FX_PROJECT_NAME project!!"
-                              udto=$(echo $(_jq '.') | jq '.regions = "'${SCANNER_NAME}'"')
-                              envId=$(echo $(_jq '.') | jq '.environment.id')
-                              envName=$(echo $(_jq '.') | jq '.environment.name')
-                              updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto")
-                              #updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data')
-                              uErrorsFlag=$(echo $updatedData | jq -r '.errors')
-                              if [ $uErrorsFlag = true ]; then     
-                                    errMsg=$(echo "$updatedData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')                                                                  
-                                    echo $errMsg
-                                    exit 1
-                              elif [ $uErrorsFlag = false ]; then 
-                                  
-                                     updatedProfData=$(echo $updatedData | jq -r '.data')                
-                                     updatedScanner=$(echo "$updatedProfData" | jq -r '.regions')
-                                     echo " "
-                                     echo "ProjectName: $FX_PROJECT_NAME"
-                                     echo "ProjectId: $PROJECT_ID"
-                                     echo "EnvironmentName: $envName"
-                                     echo "EnvironmentId: $envId"                                                                                                            
-                                     echo "ProfileName: $PROFILE_NAME"                                                                                                                                                                                        
-                                     echo "ProfileId: $profId"
-                                     echo "UpdatedScannerName: $updatedScanner"
-                                     echo " " 
-                                     exit 0
+                              if   [ "$PROFILE_SCANNER" != ""  ] && [ "$PROFILE_NAME" != ""  ] && [ "$PROFILE_CATEGORIES" != "" ];  then
+                                      echo "Updating $PROFILE_NAME profile with $SCANNER_NAME scanner and '$mPROFILE_CATEGORIES' categories in $FX_PROJECT_NAME project!!"
+                                      udto=$(echo $(_jq '.') | jq '.regions = "'${SCANNER_NAME}'"')
+                                      udto=$(echo "$udto" | jq '.categories = "'${mPROFILE_CATEGORIES}'"')
+                                      envId=$(echo $(_jq '.') | jq '.environment.id')
+                                      envName=$(echo $(_jq '.') | jq '.environment.name')
+                                      updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto")
+                                      #updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data')
+                                      uErrorsFlag=$(echo $updatedData | jq -r '.errors')
+                                      if [ $uErrorsFlag = true ]; then
+                                             errMsg=$(echo "$updatedData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')
+                                             echo $errMsg
+                                             exit 1
+                                      elif [ $uErrorsFlag = false ]; then
+
+                                             updatedProfData=$(echo $updatedData | jq -r '.data')
+                                             updatedCategories=$(echo "$updatedProfData" | jq -r '.categories')
+                                             updatedScanner=$(echo "$updatedProfData" | jq -r '.regions')
+                                             echo " "
+                                             echo "ProjectName: $FX_PROJECT_NAME"
+                                             echo "ProjectId: $PROJECT_ID"
+                                             echo "EnvironmentName: $envName"
+                                             echo "EnvironmentId: $envId"
+                                             echo "ProfileName: $PROFILE_NAME"
+                                             echo "ProfileId: $profId"
+                                             echo "UpdatedScannerName: $updatedScanner"
+                                             echo "UpdatedProfileCategories: $updatedCategories"
+                                             echo " "
+                                             exit 0
+                                      fi
+                              elif [ "$PROFILE_SCANNER" != ""  ] && [ "$PROFILE_NAME" != ""  ]; then
+                                      echo "Updating $PROFILE_NAME profile with $SCANNER_NAME scanner in $FX_PROJECT_NAME project!!"
+                                      udto=$(echo $(_jq '.') | jq '.regions = "'${SCANNER_NAME}'"')
+                                      envId=$(echo $(_jq '.') | jq '.environment.id')
+                                      envName=$(echo $(_jq '.') | jq '.environment.name')
+                                      updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto")
+                                      #updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data')
+                                      uErrorsFlag=$(echo $updatedData | jq -r '.errors')
+                                      if [ $uErrorsFlag = true ]; then
+                                             errMsg=$(echo "$updatedData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')
+                                             echo $errMsg
+                                             exit 1
+                                      elif [ $uErrorsFlag = false ]; then
+
+                                             updatedProfData=$(echo $updatedData | jq -r '.data')
+                                             updatedCategories=$(echo "$updatedProfData" | jq -r '.categories')
+                                             updatedScanner=$(echo "$updatedProfData" | jq -r '.regions')
+                                             echo " "
+                                             echo "ProjectName: $FX_PROJECT_NAME"
+                                             echo "ProjectId: $PROJECT_ID"
+                                             echo "EnvironmentName: $envName"
+                                             echo "EnvironmentId: $envId"
+                                             echo "ProfileName: $PROFILE_NAME"
+                                             echo "ProfileId: $profId"
+                                             echo "ProfileCategories: $updatedCategories"
+                                             echo "UpdatedScannerName: $updatedScanner"
+                                             echo " "
+                                             exit 0
+                                      fi
+                              elif [ "$PROFILE_CATEGORIES" != ""  ] && [ "$PROFILE_NAME" != ""  ]; then
+                                      echo "Updating $PROFILE_NAME profile with '$mPROFILE_CATEGORIES' categories in $FX_PROJECT_NAME project!!"
+                                      udto=$(echo $(_jq '.') | jq '.categories = "'${mPROFILE_CATEGORIES}'"')
+                                      envId=$(echo $(_jq '.') | jq '.environment.id')
+                                      envName=$(echo $(_jq '.') | jq '.environment.name')
+                                      updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto")
+                                      #updatedData=$(curl -s --location --request PUT "${FX_HOST}/api/v1/jobs" --header "Accept: application/json" --header "Content-Type: application/json" --header "Authorization: Bearer "$token"" -d "$udto" | jq -r '.data')
+                                      uErrorsFlag=$(echo $updatedData | jq -r '.errors')
+                                      if [ $uErrorsFlag = true ]; then
+                                             errMsg=$(echo "$updatedData" | jq -r '.messages[].value' | tr -d '[' | tr -d ']')
+                                             echo $errMsg
+                                             exit 1
+                                      elif [ $uErrorsFlag = false ]; then
+
+                                             updatedProfData=$(echo $updatedData | jq -r '.data')
+                                             updatedCategories=$(echo "$updatedProfData" | jq -r '.categories')
+                                             updatedScanner=$(echo "$updatedProfData" | jq -r '.regions')
+                                             echo " "
+                                             echo "ProjectName: $FX_PROJECT_NAME"
+                                             echo "ProjectId: $PROJECT_ID"
+                                             echo "EnvironmentName: $envName"
+                                             echo "EnvironmentId: $envId"
+                                             echo "ProfileName: $PROFILE_NAME"
+                                             echo "ProfileId: $profId"
+                                             echo "ProfileScannerName: $updatedScanner"
+                                             echo "UpdatedProfileCategories: $updatedCategories"
+                                             echo " "
+                                             exit 0
+                                      fi
                               fi
-                                                  
                        fi
                 done
-      #fi            
+      #fi
 fi
 
 
