@@ -4,8 +4,8 @@
        Script flow of execution: Script will regsiter a project if no project with that name exists and will finish there, no scanning will be trigger as auto-pilot jobs will trigger scans automatically.
                                  If a project exists with that name then it will update the project and trigger a scan.
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --openAPISpecUrl <OpenAPISpecURL>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                      --openAPISpecUrl "http://netbanking.apisec.ai:8080/v2/api-docs"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --openAPISpecUrl <OpenAPISpecURL>                                --triggerScan <true/false>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                      --openAPISpecUrl "http://netbanking.apisec.ai:8080/v2/api-docs"  --triggerScan "true"
 
 
 
@@ -15,10 +15,10 @@
                               
        Note!!! Script requires yq tool to be installed for working with yaml files and jq tool for working with json files.
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --openAPISpecFile   "<path-to-the-openApiSpec-json/yaml-file>"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --openAPISpecFile   "<path-to-the-openApiSpec-json/yaml-file>"  --triggerScan <true/false>
        
        Example-Usage: wget https://raw.githubusercontent.com/apisec-inc/Netbanking-Specs/main/netbanking-spec.json -O netbanking-spec.json
-                      bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                      --openAPISpecFile   "netbanking-spec.json"      
+                      bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                      --openAPISpecFile   "netbanking-spec.json"                      --triggerScan "true"
 
 
 ##       Use-Case 3: To Register/Update a Project via a combination of OpenAPISpecURL and File Upload 
@@ -29,38 +29,38 @@
        Note!!! Script requires yq tool to be installed for working with yaml files and jq tool for working with json files.                              
                               
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --internal_OpenAPISpecUrl <OpenAPISpecURL>                               --specType <json if specUrl have json-content OR yaml if specUrl have  yaml-content>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                      --internal_OpenAPISpecUrl "http://netbanking.apisec.ai:8080/v2/api-docs" --specType "json"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to register/update>   --internal_OpenAPISpecUrl <OpenAPISpecURL>                               --specType <json if specUrl have json-content OR yaml if specUrl have  yaml-content>  --triggerScan <true/false>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                      --internal_OpenAPISpecUrl "http://netbanking.apisec.ai:8080/v2/api-docs" --specType "json"                                                                     --triggerScan "true"
        
 
 ##       Use-Case 4: To Configure a Project's Basic AuthType Credentials.
        Script flow of execution: Script will update an auth of type ```Basic``` of an exisitng environment like ```Master``` in an existing project.
                                  
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password <app password> 
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --authName "Default"     --app_username "user1@netbanking.io"   --app_password "admin@1234"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --authName <auth Name>   --app_username <app userName>          --app_password <app password>  --triggerScan <true/false> 
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --authName "Default"     --app_username "user1@netbanking.io"   --app_password "admin@1234"    --triggerScan "true"
 
 ##       Use-Case 5: To Configure a Project's Token AuthType Credentials.
        Script flow of execution: Script will update an auth of type ```Token``` of an exisitng environment like ```Master``` in an existing project.
                                  
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --authName <auth Name>   --header_1 <complete header 1 curl request to  generate token>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --authName "ROLE_PM"     --header_1 "Authorization: Bearer {{@CmdCache | curl -s -d '{"\"""username"\""":"\"""admin"\""","\"""password"\""":"\"""secret"\"""}' -H 'Content-Type: application/json' -H 'Accept: application/json' -X POST https://ip/user/login | jq --raw-output '.info.token' }}"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --authName <auth Name>   --header_1 <complete header 1 curl request to  generate token>                                                                                                                                                                                                             --triggerScan <true/false> 
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --authName "ROLE_PM"     --header_1 "Authorization: Bearer {{@CmdCache | curl -s -d '{"\"""username"\""":"\"""admin"\""","\"""password"\""":"\"""secret"\"""}' -H 'Content-Type: application/json' -H 'Accept: application/json' -X POST https://ip/user/login | jq --raw-output '.info.token' }}"  --triggerScan "true"
        
 ##       Use-Case 6: To Configure a Project's BaseUrl.
        Script flow of execution: Script will update ```baseUrl``` of an exisitng environment like ```Master``` in an existing project.
                                  
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --baseUrl <baseUrl-of-the-openApiSpec>   
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --baseUrl   "http://netbanking.apisec.ai:8080"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update auth creds>   --envName <existing-environmentName>   --baseUrl <baseUrl-of-the-openApiSpec>          --triggerScan <true/false>   
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"                        --envName "Master"                     --baseUrl   "http://netbanking.apisec.ai:8080"  --triggerScan "true"
 
 ##       Use-Case 7: To Configure a Project's Profile for following profile use-cases.
        Use-Case 7a. To Configure a Project's Profile with a scanner and categories
        Script flow of execution: Script will update/configure a scanner and categories of an existing profile  like ```Master``` in an existing project.
                                  
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileScanner <Scanner-Name-To-Be-Configure>  --profileCategories "<Comma Separated Category Names>"               --profile <Profile-Name>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --profileScanner "Super_3"                       --profileCategories "Unsecured,ABAC_Level1,Linux_Command_Injection"  --profile "Master"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileScanner <Scanner-Name-To-Be-Configure>  --profileCategories "<Comma Separated Category Names>"               --profile <Profile-Name>  --triggerScan <true/false>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --profileScanner "Super_3"                       --profileCategories "Unsecured,ABAC_Level1,Linux_Command_Injection"  --profile "Master"        --triggerScan "true"
        
       
 
@@ -69,8 +69,8 @@
        Script flow of execution: Script will update/configure a scanner of an existing profile  like ```Master``` in an existing project.
                                  
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileScanner <Scanner-Name-To-Be-Configure> --profile <Profile-Name>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --profileScanner "Super_3"                      --profile "Master" 
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileScanner <Scanner-Name-To-Be-Configure> --profile <Profile-Name>  --triggerScan <true/false>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --profileScanner "Super_3"                      --profile "Master"        --triggerScan "true"
        
        
 
@@ -79,8 +79,8 @@
        Script flow of execution: Script will update/configure a categories of an existing profile  like ```Master``` in an existing project.
                                  
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileCategories "<Comma Separated Category Names>"               --profile <Profile-Name>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --profileCategories "Unsecured,ABAC_Level1,Linux_Command_Injection"  --profile "Master" 
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --profileCategories "<Comma Separated Category Names>"               --profile <Profile-Name>   --triggerScan <true/false>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --profileCategories "Unsecured,ABAC_Level1,Linux_Command_Injection"  --profile "Master"         --triggerScan "true"
        
        Note!!: If no profile name is passed with these use-cases then Master profile will get configured.       
 
@@ -88,8 +88,8 @@
        Script flow of execution: Script will Refresh/Reload of an existing project specs.
                                  
        
-       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --refresh-playbooks <true/false>
-       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --refresh-playbooks "true"
+       Syntax:        bash apisec-script.sh --host "<host-url/IP>"                --username <apisec_username>     --password <apisec_password>   --project <project_name to update >  --refresh-playbooks <true/false>  --triggerScan <true/false>
+       Example-Usage: bash apisec-script.sh --host "https://cloud.apisec.ai"      --username "admin@apisec.ai"     --password "admin@1234"        --project "netbankinapp"             --refresh-playbooks "true"        --triggerScan "true"
 
 ##       Use-Case 9: To Fail script execution for a Vulnerability.
        Script flow of execution: Script will trigger a scan and will fail script execution upon finding passed severity vulnerability like 'Critical'.
