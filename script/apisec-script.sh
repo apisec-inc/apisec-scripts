@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin
 
-TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,profileCategories:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,baseUrl:,category:,tier:,tags:, header_1:" -- -- "$@")
+TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner:,outputfile:,emailReport:,reportType:,triggerScan:,fail-on-vuln-severity:,refresh-playbooks:,openAPISpecUrl:,openAPISpecFile:,internal_OpenAPISpecUrl:,specType:,profileScanner:,profileCategories:,envName:,authName:,app_username:,app_password:,app_endPointUrl:,app_token_param:,baseUrl:,category:,tier:,tags:, header_1:" -- -- "$@")
 
     [ $? -eq 0 ] || exit
 
@@ -20,6 +20,7 @@ TEMP=$(getopt -n "$0" -a -l "host:,username:,password:,project:,profile:,scanner
 		    
                     --emailReport) FX_EMAIL_REPORT="$2"; shift;;
                     --reportType) FX_REPORT_TYPE="$2"; shift;;
+                    --triggerScan) FX_TRIGGER_SCAN="$2"; shift;;
 
                     # To Fail script execution on Vulnerable severity
                     --fail-on-vuln-severity) FAIL_ON_VULN_SEVERITY="$2"; shift;;
@@ -173,11 +174,21 @@ else
         PROJECT_NAME_FLAG=true
 fi
 
+# To check scanner exists
+if   [ "$FX_TRIGGER_SCAN" == ""  ]; then
+        FX_TRIGGER_SCAN=true
+elif [ "$FX_TRIGGER_SCAN" == "true"  ] || [ "$FX_TRIGGER_SCAN" == "True" ]; then
+        FX_TRIGGER_SCAN=true
+else 
+        FX_TRIGGER_SCAN=false
+fi
+
 tokenResp=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login )
 #tokenResp1=$(echo "$tokenResp" | jq -r . | cut -d: -f1 | cut -d{ -f1 | cut -d} -f2 | cut -d'"' -f2)
 tokenResp1=$(echo "$tokenResp" | jq -r . | cut -d: -f1 | tr -d '{' | tr -d '}' | tr -d '"') 
 if [ $tokenResp1 == "token" ];then
       token=$(echo $tokenResp | jq -r '.token')
+      echo " "
       echo "generated token is:" $token
       echo " "  
 elif [ $tokenResp1 == "message" ];then  
@@ -276,8 +287,12 @@ if [ "$OAS" = true ]; then
                               echo "ProjectName: '$project_name'"
                               echo "ProjectId: $project_id"
                               echo " "
-                              #echo 'Script Execution is Done.'
-                              #exit 0
+                              if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                    #echo 'Script Execution is Done.'
+                                    echo "Triggering a scan" > /dev/null
+                              else 
+                                    exit 0
+                              fi
                         fi
 
                         # if [ $retryCount -ge 55  ]; then
@@ -389,8 +404,12 @@ if [ "$OASFile" = true ]; then
                               echo "ProjectName: $project_name"
                               echo "ProjectId: $project_id"
                               echo " "
-                              #echo 'Script Execution is Done.'
-                              #exit 0
+                              if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                    #echo 'Script Execution is Done.'
+                                    echo "Triggering a scan" > /dev/null
+                              else 
+                                    exit 0
+                              fi
                         fi
 
                         # if [ $retryCount -ge 55  ]; then
@@ -511,8 +530,12 @@ if [ "$INTERNAL_SPEC_FLAG" = true ]; then
                               echo "ProjectName: $project_name"
                               echo "ProjectId: $project_id"
                               echo " "
-                              #echo 'Script Execution is Done.'
-                              #exit 0
+                              if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                    #echo 'Script Execution is Done.'
+                                    echo "Triggering a scan" > /dev/null
+                              else 
+                                    exit 0
+                              fi
                         fi
 
                         # if [ $retryCount -ge 55  ]; then
@@ -614,7 +637,12 @@ if [ "$REFRESH_PLAYBOOKS" = true ]; then
                             if [ "$playbookTaskStatus" == "Done" ]; then
                                   echo "Playbooks refresh task is succesfully completed!!!"
                                   echo " "
-                                  exit 0
+                                  if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                        #echo 'Script Execution is Done.'
+                                        echo "Triggering a scan" > /dev/null
+                                  else 
+                                        exit 0
+                                  fi
                             fi
 
                             if [ $retryCount -ge 55  ]; then
@@ -805,7 +833,12 @@ if [ "$PROFILE_SCANNER_FLAG" = true ]; then
                                              echo "UpdatedScannerName: $updatedScanner"
                                              echo "UpdatedProfileCategories: $updatedCategories"
                                              echo " "
-                                             exit 0
+                                             if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                                   #echo 'Script Execution is Done.'
+                                                   echo "Triggering a scan" > /dev/null
+                                             else
+                                                   exit 0
+                                             fi
                                       fi
                               elif [ "$PROFILE_SCANNER" != ""  ] && [ "$PROFILE_NAME" != ""  ]; then
                                       echo "Updating $PROFILE_NAME profile with $SCANNER_NAME scanner in $FX_PROJECT_NAME project!!"
@@ -834,7 +867,12 @@ if [ "$PROFILE_SCANNER_FLAG" = true ]; then
                                              echo "ProfileCategories: $updatedCategories"
                                              echo "UpdatedScannerName: $updatedScanner"
                                              echo " "
-                                             exit 0
+                                             if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                                   #echo 'Script Execution is Done.'
+                                                   echo "Triggering a scan" > /dev/null
+                                             else
+                                                   exit 0
+                                             fi
                                       fi
                               elif [ "$PROFILE_CATEGORIES" != ""  ] && [ "$PROFILE_NAME" != ""  ]; then
                                       echo "Updating $PROFILE_NAME profile with '$mPROFILE_CATEGORIES' categories in $FX_PROJECT_NAME project!!"
@@ -863,7 +901,12 @@ if [ "$PROFILE_SCANNER_FLAG" = true ]; then
                                              echo "ProfileScannerName: $updatedScanner"
                                              echo "UpdatedProfileCategories: $updatedCategories"
                                              echo " "
-                                             exit 0
+                                             if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                                   #echo 'Script Execution is Done.'
+                                                   echo "Triggering a scan" > /dev/null
+                                             else
+                                                   exit 0
+                                             fi
                                       fi
                               fi
                        fi
@@ -954,7 +997,12 @@ if   [ "$AUTH_FLAG" = true  ]; then
                                                                                                      echo "EnvironmentId: $eId" 
                                                                                                      echo "UpdatedAuth: $updatedAuthObj"
                                                                                                      echo " "
-                                                                                                     exit 0
+                                                                                                     if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                                                                                           #echo 'Script Execution is Done.'
+                                                                                                           echo "Triggering a scan" > /dev/null
+                                                                                                     else
+                                                                                                           exit 0
+                                                                                                     fi
                                                                                               fi
                                                                                        done
                                                                            fi            
@@ -991,7 +1039,12 @@ if   [ "$AUTH_FLAG" = true  ]; then
                                                                                                      echo "EnvironmentId: $eId" 
                                                                                                      echo "UpdatedAuth: $updatedAuthObj"
                                                                                                      echo " "
-                                                                                                     exit 0
+                                                                                                     if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                                                                                           #echo 'Script Execution is Done.'
+                                                                                                           echo "Triggering a scan" > /dev/null
+                                                                                                     else
+                                                                                                           exit 0
+                                                                                                     fi
                                                                                               fi
                                                                                        done
                                                                            fi              
@@ -1032,7 +1085,12 @@ if   [ "$AUTH_FLAG" = true  ]; then
                                                                                                      echo "EnvironmentId: $eId" 
                                                                                                      echo "UpdatedAuth: $updatedAuthObj"
                                                                                                      echo " "
-                                                                                                     exit 0
+                                                                                                     if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                                                                                           #echo 'Script Execution is Done.'
+                                                                                                           echo "Triggering a scan" > /dev/null
+                                                                                                     else
+                                                                                                           exit 0
+                                                                                                     fi
                                                                                               fi
                                                                                        done
                                                                            fi 
@@ -1094,7 +1152,12 @@ if [ "$BASE_URL_FLAG" = true ]; then
                                   echo "EnvironmentId: $eId"
                                   echo "UpdatedBaseUrl: $updatedBaseUrl"
                                   echo " "
-                                  exit 0
+                                  if [ $FX_TRIGGER_SCAN == "true" ]; then
+                                        #echo 'Script Execution is Done.'
+                                        echo "Triggering a scan" > /dev/null
+                                  else
+                                        exit 0
+                                  fi
                            fi
                fi
         done
