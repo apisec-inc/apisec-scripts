@@ -183,7 +183,8 @@ else
         FX_TRIGGER_SCAN=false
 fi
 
-tokenResp=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login )
+#tokenResp=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${FX_USER}'", "password": "'${FX_PWD}'"}' ${FX_HOST}/login )
+tokenResp=$(curl -s -H "Content-Type: application/json" -X POST -d "{\"username\":\"${FX_USER}\",\"password\":\"${FX_PWD}\"}" "${FX_HOST}/login")
 #tokenResp1=$(echo "$tokenResp" | jq -r . | cut -d: -f1 | cut -d{ -f1 | cut -d} -f2 | cut -d'"' -f2)
 tokenResp1=$(echo "$tokenResp" | jq -r . | cut -d: -f1 | tr -d '{' | tr -d '}' | tr -d '"') 
 if [ $tokenResp1 == "token" ];then
